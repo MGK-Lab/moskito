@@ -37,6 +37,7 @@ validParams<MoskitoFluidWell_2p1c>()
         "The name of the userobject for 2 phase viscosity Eq");
   params.addRequiredParam<UserObjectName>("drift_flux_uo",
         "The name of the userobject for drift flux model");
+  params.addRequiredCoupledVar("massrate", "Massrate nonlinear variable (m^3/s)");
   return params;
 }
 
@@ -52,9 +53,9 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _rho_m(declareProperty<Real>("density")),
     _rho_pam(declareProperty<Real>("profile_mixture_density")),
     _drho_m_dp(declareProperty<Real>("drho_dp")),
-    _drho_m_dp_2(declareProperty<Real>("drho_dp_2")),
+    _drho_m_dp2(declareProperty<Real>("drho_dp2")),
     _drho_m_dh(declareProperty<Real>("drho_dh")),
-    _drho_m_dh_2(declareProperty<Real>("drho_dh_2")),
+    _drho_m_dh2(declareProperty<Real>("drho_dh2")),
     _drho_m_dph(declareProperty<Real>("drho_dph")),
     _vmfrac(declareProperty<Real>("mass_fraction")),
     _u_g(declareProperty<Real>("gas_velocity")),
@@ -92,7 +93,8 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _domega_dh2(declareProperty<Real>("domega_dh2")),
     _domega_dq2(declareProperty<Real>("domega_dq2")),
     _h(coupledValue("enthalpy")),
-    _grad_flow(coupledGradient("flowrate")),
+    _m(coupledValue("massrate")),
+    _grad_m(coupledGradient("massrate")),
     _grad_h(coupledGradient("enthalpy")),
     _grad_p(coupledGradient("pressure"))
 {
@@ -105,8 +107,8 @@ MoskitoFluidWell_2p1c::computeQpProperties()
 
   // To calculate required properties based on the given EOS
   eos_uo.VMFrac_T_from_p_h(_P[_qp], _h[_qp], _vmfrac[_qp], _T[_qp], _phase[_qp]);
-  eos_uo.rho_m_by_p(_P[_qp], _h[_qp], _rho_m[_qp], _drho_m_dp[_qp], _drho_m_dp_2[_qp]);
-  eos_uo.rho_m_by_h(_P[_qp], _h[_qp], _rho_m[_qp], _drho_m_dh[_qp], _drho_m_dh_2[_qp]);
+  eos_uo.rho_m_by_p(_P[_qp], _h[_qp], _rho_m[_qp], _drho_m_dp[_qp], _drho_m_dp2[_qp]);
+  eos_uo.rho_m_by_h(_P[_qp], _h[_qp], _rho_m[_qp], _drho_m_dh[_qp], _drho_m_dh2[_qp]);
   eos_uo.rho_m_by_ph(_P[_qp], _h[_qp], _drho_m_dph[_qp]);
   _rho_l[_qp] = eos_uo.rho_l_from_p_T(_P[_qp], _T[_qp], _phase[_qp]);
   _rho_g[_qp] = eos_uo.rho_g_from_p_T(_P[_qp], _T[_qp], _phase[_qp]);
@@ -114,7 +116,7 @@ MoskitoFluidWell_2p1c::computeQpProperties()
   _cp_m[_qp]  = eos_uo.cp_m_from_p_T(_P[_qp], _T[_qp], _vmfrac[_qp], _phase[_qp]);
 
   // To calculate the friction factor and Re No
-  _u[_qp] = _flow[_qp] / _area[_qp];
+  _u[_qp] = fabs(_m[_qp]) / _rho_m[_qp] / _area[_qp];
   _Re[_qp] = _rho_m[_qp] * _dia[_qp] * _u[_qp] / viscosity_uo.mixture_mu(_P[_qp], _T[_qp], _vmfrac[_qp]);
   if (_f_defined)
     _friction[_qp] = _u_f;

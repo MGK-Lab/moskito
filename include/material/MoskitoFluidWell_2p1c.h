@@ -69,11 +69,11 @@ protected:
   // The first derivative of mixture density wrt pressure
   MaterialProperty<Real> & _drho_m_dp;
   // The second derivative of mixture density wrt pressure
-  MaterialProperty<Real> & _drho_m_dp_2;
+  MaterialProperty<Real> & _drho_m_dp2;
   // The first derivative of mixture density wrt enthalpy
   MaterialProperty<Real> & _drho_m_dh;
   // The second derivative of mixture density wrt enthalpy
-  MaterialProperty<Real> & _drho_m_dh_2;
+  MaterialProperty<Real> & _drho_m_dh2;
   // The second derivative of mixture density wrt enthalpy and pressure
   MaterialProperty<Real> & _drho_m_dph;
   // mass_fraction
@@ -153,9 +153,10 @@ protected:
 
   // The coupled enthalpy
   const VariableValue & _h;
+  const VariableValue & _m;
 
   // The gradient of the coupled variables
-  const VariableGradient & _grad_flow;
+  const VariableGradient & _grad_m;
   const VariableGradient & _grad_h;
   const VariableGradient & _grad_p;
 };
