@@ -28,7 +28,6 @@
   [../]
   [./eos]
     type = MoskitoPureWater2P
-    derivative_tolerance = 9e-3
   [../]
 []
 
@@ -64,7 +63,7 @@
     type = FunctionDirichletBC
     variable = m
     boundary = left
-    function = 'if(t<10,0,0.15*(t-10))'
+    function = 'if(t<10,0,if(t<20,0.15*(t-10),1.5))'
   [../]
 []
 
@@ -95,10 +94,21 @@
     massrate = m
     enthalpy = h
   [../]
+  [./ptkernel]
+    type = MoskitoTimeMomentum_2p1c
+    variable = p
+    massrate = m
+  [../]
   [./mkernel]
     type = MoskitoMass_2p1c
     variable = m
   [../]
+  # [./mtkernel]
+  #   type = MoskitoTimeMass_2p1c
+  #   variable = m
+  #   pressure = p
+  #   enthalpy = h
+  # [../]
 []
 
 [Preconditioning]
@@ -129,13 +139,13 @@
 
 [Executioner]
   type = Transient
-  dt = 1
-  end_time = 20
+  dt = 4
+  end_time = 40
   l_max_its = 50
   nl_max_its = 100
   l_tol = 1e-8
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 1e-8
   solve_type = NEWTON
   automatic_scaling = true
   compute_scaling_once = false

@@ -40,28 +40,13 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  // required values for enthalpy and pressure coupling
-  const VariableValue & _p_dot;
-  const VariableValue & _h_dot;
-  const VariableValue & _dp_dot;
-  const VariableValue & _dh_dot;
-  const unsigned int _p_var_number;
-  const unsigned int _h_var_number;
+  // The required values for massrate coupling
+  const VariableValue & _m_dot;
+  const VariableValue & _dm_dot;
+  const unsigned int _m_var_number;
 
   // The sign of well flow direction
   const MaterialProperty<Real> & _well_sign;
   // The area of pipe
   const MaterialProperty<Real> & _area;
-  // The density
-  const MaterialProperty<Real> & _rho;
-  // The first derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The second derivative of density wrt enthalpy and pressure
-  const MaterialProperty<Real> & _drho_dph;
 };
