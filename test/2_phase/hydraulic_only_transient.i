@@ -37,7 +37,6 @@
     well_diameter = 0.1
     pressure = p
     enthalpy = h
-    flowrate = q
     massrate = m
     well_direction = x
     well_type = production
