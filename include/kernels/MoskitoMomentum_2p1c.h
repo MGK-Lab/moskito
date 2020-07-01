@@ -72,13 +72,13 @@ protected:
   const MaterialProperty<Real> & _well_sign;
   //
   // // The gamma derivatives
-  // const MaterialProperty<Real> & _dgamma_dp;
-  // const MaterialProperty<Real> & _dgamma_dh;
-  // const MaterialProperty<Real> & _dgamma_dq;
-  // const MaterialProperty<Real> & _dgamma_dph;
-  // const MaterialProperty<Real> & _dgamma_dpq;
-  // const MaterialProperty<Real> & _dgamma_dhq;
-  // const MaterialProperty<Real> & _dgamma_dp2;
-  // const MaterialProperty<Real> & _dgamma_dh2;
-  // const MaterialProperty<Real> & _dgamma_dq2;
+  const MaterialProperty<Real> & _dgamma_dp;
+  const MaterialProperty<Real> & _dgamma_dh;
+  const MaterialProperty<Real> & _dgamma_dv;
+  const MaterialProperty<Real> & _dgamma_dph;
+  const MaterialProperty<Real> & _dgamma_dpv;
+  const MaterialProperty<Real> & _dgamma_dhv;
+  const MaterialProperty<Real> & _dgamma_dp2;
+  const MaterialProperty<Real> & _dgamma_dh2;
+  const MaterialProperty<Real> & _dgamma_dv2;
 };

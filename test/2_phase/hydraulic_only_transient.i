@@ -47,7 +47,7 @@
     # manual_friction_factor = 0
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'void_fraction mass_fraction current_phase gas_density liquid_density density temperature drho_dp'
+    output_properties = 'void_fraction current_phase density temperature dgamma_dp dgamma_dv dgamma_dh dgamma_dp2 dgamma_dv2 dgamma_dh2 dgamma_dph dgamma_dpv dgamma_dhv'
   [../]
 []
 
@@ -80,9 +80,6 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 5e5
-  [../]
-  [./q]
-    initial_condition = 0
   [../]
 []
 
@@ -138,16 +135,18 @@
 
 [Executioner]
   type = Transient
-  dt = 4
+  dt = 5
   end_time = 40
   l_max_its = 50
-  nl_max_its = 100
+  nl_max_its = 50
   l_tol = 1e-8
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
   solve_type = NEWTON
   automatic_scaling = true
   compute_scaling_once = false
+  # steady_state_detection = true
+  # steady_state_tolerance = 1e-02
   [./Quadrature]
     type = GAUSS
     element_order = FIRST

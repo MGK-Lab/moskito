@@ -81,9 +81,6 @@
     family = LAGRANGE
     initial_condition = 5e5
   [../]
-  [./q]
-    initial_condition = 0
-  [../]
 []
 
 [Kernels]
@@ -127,10 +124,10 @@
 
 [Executioner]
   type = Transient
-  dt = 1
+  dt = 5
   end_time = 20
   l_max_its = 50
-  nl_max_its = 100
+  nl_max_its = 50
   l_tol = 1e-8
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
