@@ -6,6 +6,7 @@
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
 /*  This file is part of MOSKITO App                                      */
+/*  Co-developed by Sebastian Held                                        */
 /*                                                                        */
 /*  This program is free software: you can redistribute it and/or modify  */
 /*  it under the terms of the GNU General Public License as published by  */
@@ -117,7 +118,7 @@ MoskitoDFShi::Shicalculator(MoskitoDFGVar & input, MoskitoShiLVar & LVar) const
 {
 	//C0 is the parameter quantifying the cross section (liquid-gas mixture) of the well; used in _vd and in well2pMaterial
   input._C0 = _C0_cMax / (1.0 + (_C0_cMax - 1.0) * cal_auxvar_nu(input, LVar) * cal_auxvar_nu(input, LVar));
-  
+
   input._vd = (1.0 - input._C0 * input._vfrac) * LVar.v_c * cal_transition_fct(input,LVar);
   input._vd /= input._C0 * input._vfrac * std::pow(input._rho_g / input._rho_l ,0.5) + 1.0 - input._vfrac * input._C0;
   // inclinaciton correction after HK and Shi
