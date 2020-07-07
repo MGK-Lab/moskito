@@ -118,14 +118,6 @@ MoskitoMomentum_2p1c::computeQpJacobian()
   j += _dgamma_dv[_qp] * _grad_m[_qp] * -_drho_dp[_qp] *_phi[_j][_qp]
         / (_rho[_qp] * _rho[_qp] * _area[_qp]);
 
-  // j += _dgamma_dv[_qp] * -_drho_dp[_qp] *_phi[_j][_qp] * _grad_m[_qp]
-  //       / (_rho[_qp] * _rho[_qp] * _area[_qp]);
-  // j += (-(_drho_dp2[_qp] *_phi[_j][_qp] * _grad_u[_qp] + _drho_dp[_qp]
-  //       * _grad_phi[_j][_qp] + _drho_dph[_qp] *_phi[_j][_qp] * _grad_h[_qp])
-  //       * _rho[_qp] + 2.0 * _drho_dp[_qp] * _phi[_j][_qp] * (_drho_dp[_qp]
-  //       * _grad_u[_qp] + _drho_dh[_qp] * _grad_h[_qp])) * _m[_qp] / (_rho[_qp]
-  //       * _rho[_qp] * _rho[_qp] * _area[_qp]);
-
   return j * _well_dir[_qp] * _test[_i][_qp];
 }
 
@@ -143,9 +135,6 @@ MoskitoMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
           / (_rho[_qp] * a2);
     j += _well_sign[_qp] * _well_dir[_qp] * _f[_qp] * 2.0 * _m[_qp]
           * _phi[_j][_qp] * _perimeter[_qp] / (8.0 * _area[_qp] * _rho[_qp] * a2);
-
-    // j += _dgamma_dv[_qp] * (_grad_phi[_j][_qp] - (_drho_dp[_qp] * _grad_u[_qp]
-                // + _drho_dh[_qp] * _grad_h[_qp]) * _phi[_j][_qp] / _rho[_qp]) / (_rho[_qp] * _area[_qp]);
 
     j += _dgamma_dhv[_qp] * _phi[_j][_qp] * _grad_h[_qp] / (_rho[_qp] * _area[_qp]);
     j += _dgamma_dpv[_qp] * _phi[_j][_qp] * _grad_u[_qp] / (_rho[_qp] * _area[_qp]);
