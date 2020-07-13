@@ -85,8 +85,6 @@ MoskitoMomentum_2p1c::computeQpResidual()
   r += _dgamma_dh[_qp] * _grad_h[_qp];
   r += _dgamma_dp[_qp] * _grad_u[_qp];
   r += _dgamma_dv[_qp] * _grad_m[_qp] / (_rho[_qp] * _area[_qp]);
-  // r += _dgamma_dv[_qp] * (_grad_m[_qp] - (_drho_dp[_qp] * _grad_u[_qp]
-  //       + _drho_dh[_qp] * _grad_h[_qp]) * _m[_qp] / _rho[_qp]) / (_rho[_qp] * _area[_qp]);
 
   return r * _well_dir[_qp] * _test[_i][_qp];
 }

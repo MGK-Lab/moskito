@@ -44,10 +44,9 @@
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
     roughness_type = smooth
-    # manual_friction_factor = 0
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'void_fraction mass_fraction current_phase gas_density liquid_density density temperature drho_dp'
+    output_properties = 'well_velocity domega_dp domega_dh domega_dv dkappa_dp dkappa_dh dkappa_dv void_fraction density temperature'
   [../]
 []
 
@@ -62,7 +61,7 @@
     type = FunctionDirichletBC
     variable = m
     boundary = right
-    function = 'if(t<15, 1e-5+0.1*t, 1.5)'
+    function = 'if(t<15, 1e-5+0.06*t, 0.9)'
   [../]
   [./hbc]
     type = FunctionDirichletBC
@@ -115,8 +114,8 @@
   [./pn1]
     type = SMP
     full = true
-    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -snes_type -snes_linesearch_type'
-    petsc_options_value = ' bjacobi  ilu          NONZERO                   newtonls   basic               '
+    petsc_options_iname = '-pc_type -sub_pc_type  -snes_type -snes_linesearch_type'
+    petsc_options_value = ' bjacobi  ilu                           newtonls   basic               '
   [../]
 []
 
@@ -125,24 +124,24 @@
     type = BoundingValueNodalDamper
     variable = p
     min_value = 1e4
-    max_value = 50e6
-    min_damping = 1e-5
+    max_value = 6e6
+    min_damping = 1e-10
   [../]
   [./h]
     type = BoundingValueNodalDamper
     variable = h
     min_value = 1e4
-    max_value = 3e6
-    min_damping = 1e-5
+    max_value = 2e6
+    min_damping = 1e-10
   [../]
 []
 
 [Executioner]
   type = Transient
-  dt = 5
+  dt = 1
   end_time = 20
   l_max_its = 50
-  nl_max_its = 50
+  nl_max_its = 100
   l_tol = 1e-8
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-7
@@ -152,13 +151,12 @@
   [./Quadrature]
     type = GAUSS
     element_order = FIRST
-    order = THIRD
   [../]
 []
 
 
 [Outputs]
-  # execute_on = 'INITIAL NONLINEAR TIMESTEP_END '
+  # execute_on = 'INITIAL NONLINEAR TIMESTEP_END'
   print_linear_residuals = false
   exodus = true
 []

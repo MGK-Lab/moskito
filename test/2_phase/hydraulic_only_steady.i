@@ -47,7 +47,7 @@
     # manual_friction_factor = 0
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'void_fraction mass_fraction current_phase gas_density liquid_density density temperature drho_dp'
+    output_properties = 'well_velocity void_fraction density temperature gas_velocity liquid_velocity '
   [../]
 []
 
