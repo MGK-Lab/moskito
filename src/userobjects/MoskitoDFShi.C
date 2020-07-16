@@ -65,7 +65,7 @@ void
 MoskitoDFShi::DFMCalculator(MoskitoDFGVar & input) const
 {
   MoskitoShiLVar tmp;
-  if (input._mfrac > 0.0 && input._mfrac < 1.0)
+  if (input._mfrac > 0.0 && input._mfrac < 1.0 && input._v_m > 0.0)
   {
       //check constraints of Shi approach limiting the approach to a deviation of 70° from vertical
       if (input._angle > 0.3888 * PI)

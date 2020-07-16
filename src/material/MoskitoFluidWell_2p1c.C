@@ -67,13 +67,7 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _flow_pat(declareProperty<Real>("flow_pattern")),
     _dgamma_dp(declareProperty<Real>("dgamma_dp")),
     _dgamma_dh(declareProperty<Real>("dgamma_dh")),
-    _dgamma_dv(declareProperty<Real>("dgamma_dv")),
-    _dgamma_dph(declareProperty<Real>("dgamma_dph")),
-    _dgamma_dpv(declareProperty<Real>("dgamma_dpv")),
-    _dgamma_dhv(declareProperty<Real>("dgamma_dhv")),
-    _dgamma_dp2(declareProperty<Real>("dgamma_dp2")),
-    _dgamma_dh2(declareProperty<Real>("dgamma_dh2")),
-    _dgamma_dv2(declareProperty<Real>("dgamma_dv2")),
+    _dgamma_dm(declareProperty<Real>("dgamma_dm")),
     _dkappa_dp(declareProperty<Real>("dkappa_dp")),
     _dkappa_dh(declareProperty<Real>("dkappa_dh")),
     _dkappa_dv(declareProperty<Real>("dkappa_dv")),
@@ -144,7 +138,7 @@ MoskitoFluidWell_2p1c::PhaseVelocities()
 {
   // based on mass weighted flow rate
   // momentum eq is valid only by mass mixing flow rate
-  if (_phase[_qp] == 2.0)
+  if (_phase[_qp] == 2.0 && _u[_qp] != 0.0)
   {
     _u_g[_qp]  = _c0[_qp] * _rho_m[_qp] * _u[_qp] + _rho_l[_qp] * _u_d[_qp];
     _u_g[_qp] /= _rho_pam[_qp];
@@ -167,7 +161,7 @@ MoskitoFluidWell_2p1c::PhaseVelocities()
 }
 
 Real
-MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & v)
+MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & m)
 {
   Real vmfrac, T, phase, gamma = 0.0;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
@@ -183,7 +177,7 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & v)
 
     gamma  = vfrac / (1.0 - vfrac);
     gamma *= rho_g * rho_l * rho_m / (rho_pam * rho_pam);
-    gamma *= std::pow((_c0[_qp] - 1.0) * v * _well_sign[_qp] + _u_d[_qp] , 2.0);
+    gamma *= std::pow((_c0[_qp] - 1.0) * (m / rho_m / _area[_qp]) + _u_d[_qp] , 2.0);
   }
 
   return gamma;
@@ -251,74 +245,30 @@ MoskitoFluidWell_2p1c::omega(const Real & h, const Real & p, const Real & v)
 void
 MoskitoFluidWell_2p1c::GammaDerivatives()
 {
-  _dgamma_dp[_qp]  = 0.0; _dgamma_dh[_qp]  = 0.0; _dgamma_dv[_qp]  = 0.0;
-  _dgamma_dph[_qp] = 0.0; _dgamma_dpv[_qp] = 0.0; _dgamma_dhv[_qp] = 0.0;
-  _dgamma_dp2[_qp] = 0.0; _dgamma_dh2[_qp] = 0.0; _dgamma_dv2[_qp] = 0.0;
+  _dgamma_dp[_qp]  = 0.0; _dgamma_dh[_qp]  = 0.0; _dgamma_dm[_qp]  = 0.0;
 
   if (_phase[_qp] == 2.0)
   {
-    Real dh, dv, dp;
+    Real dh, dm, dp;
     Real tol = 1.0e-3;
-    dh = tol * _h[_qp]; dp = tol * _P[_qp]; dv = tol * _u[_qp];
+    dh = tol * _h[_qp]; dp = tol * _P[_qp]; dm = tol * _m[_qp];
 
     if (dh != 0.0)
     {
-      _dgamma_dh[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _u[_qp]) - gamma(_h[_qp] - dh, _P[_qp], _u[_qp]);
+      _dgamma_dh[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _m[_qp]) - gamma(_h[_qp] - dh, _P[_qp], _m[_qp]);
       _dgamma_dh[_qp] /= 2.0 * dh;
     }
 
     if (dp != 0.0)
     {
-    _dgamma_dp[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _u[_qp]) - gamma(_h[_qp], _P[_qp] - dp, _u[_qp]);
+    _dgamma_dp[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _m[_qp]) - gamma(_h[_qp], _P[_qp] - dp, _m[_qp]);
     _dgamma_dp[_qp] /= 2.0 * dp;
     }
 
-    if (dv != 0.0)
+    if (dm != 0.0)
     {
-    _dgamma_dv[_qp]  = gamma(_h[_qp], _P[_qp], _u[_qp] + dv) - gamma(_h[_qp], _P[_qp], _u[_qp] - dv);
-    _dgamma_dv[_qp] /= 2.0 * dv;
-    }
-
-    if (dp * dh != 0.0)
-    {
-    _dgamma_dph[_qp]  = gamma(_h[_qp] + dh, _P[_qp] + dp, _u[_qp]) + gamma(_h[_qp] - dh, _P[_qp] - dp, _u[_qp]);
-    _dgamma_dph[_qp] -= gamma(_h[_qp] + dh, _P[_qp] - dp, _u[_qp]) + gamma(_h[_qp] - dh, _P[_qp] + dp, _u[_qp]);
-    _dgamma_dph[_qp] /= 4.0 * dh * dp;
-    }
-
-    if (dh * dv != 0.0)
-    {
-    _dgamma_dhv[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _u[_qp] + dv) + gamma(_h[_qp] - dh, _P[_qp], _u[_qp] - dv);
-    _dgamma_dhv[_qp] -= gamma(_h[_qp] + dh, _P[_qp], _u[_qp] - dv) + gamma(_h[_qp] - dh, _P[_qp], _u[_qp] + dv);
-    _dgamma_dhv[_qp] /= 4.0 * dh * dv;
-    }
-
-    if (dp * dv != 0.0)
-    {
-    _dgamma_dpv[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _u[_qp] + dv) + gamma(_h[_qp], _P[_qp] - dp, _u[_qp] - dv);
-    _dgamma_dpv[_qp] -= gamma(_h[_qp], _P[_qp] + dp, _u[_qp] - dv) + gamma(_h[_qp], _P[_qp] - dp, _u[_qp] + dv);
-    _dgamma_dpv[_qp] /= 4.0 * dp * dv;
-    }
-
-    if (dp != 0.0)
-    {
-    _dgamma_dp2[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _u[_qp]) + gamma(_h[_qp], _P[_qp] - dp, _u[_qp]);
-    _dgamma_dp2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _u[_qp]);
-    _dgamma_dp2[_qp] /=  dp * dp;
-    }
-
-    if (dh != 0.0)
-    {
-    _dgamma_dh2[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _u[_qp]) + gamma(_h[_qp] - dh, _P[_qp], _u[_qp]);
-    _dgamma_dh2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _u[_qp]);
-    _dgamma_dh2[_qp] /=  dh * dh;
-    }
-
-    if (dv != 0.0)
-    {
-    _dgamma_dv2[_qp]  = gamma(_h[_qp], _P[_qp], _u[_qp] + dv) + gamma(_h[_qp], _P[_qp], _u[_qp] - dv);
-    _dgamma_dv2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _u[_qp]);
-    _dgamma_dv2[_qp] /=  dv * dv;
+    _dgamma_dm[_qp]  = gamma(_h[_qp], _P[_qp], _m[_qp] + dm) - gamma(_h[_qp], _P[_qp], _m[_qp] - dm);
+    _dgamma_dm[_qp] /= 2.0 * dm;
     }
   }
 }

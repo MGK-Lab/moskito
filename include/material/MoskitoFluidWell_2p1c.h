@@ -42,7 +42,7 @@ public:
   void GammaDerivatives();
   void KappaDerivatives();
   void OmegaDerivatives();
-  Real gamma(const Real & h, const Real & p, const Real & v);
+  Real gamma(const Real & h, const Real & p, const Real & m);
   Real kappa(const Real & h, const Real & p, const Real & v);
   Real omega(const Real & h, const Real & p, const Real & v);
 
@@ -99,19 +99,7 @@ protected:
   // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dh;
   // The gamma first derivatives
-  MaterialProperty<Real> & _dgamma_dv;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dph;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dpv;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dhv;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dp2;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dh2;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dv2;
+  MaterialProperty<Real> & _dgamma_dm;
 
   // The kappa first derivatives
   MaterialProperty<Real> & _dkappa_dp;

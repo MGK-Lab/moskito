@@ -74,11 +74,5 @@ protected:
   // // The gamma derivatives
   const MaterialProperty<Real> & _dgamma_dp;
   const MaterialProperty<Real> & _dgamma_dh;
-  const MaterialProperty<Real> & _dgamma_dv;
-  const MaterialProperty<Real> & _dgamma_dph;
-  const MaterialProperty<Real> & _dgamma_dpv;
-  const MaterialProperty<Real> & _dgamma_dhv;
-  const MaterialProperty<Real> & _dgamma_dp2;
-  const MaterialProperty<Real> & _dgamma_dh2;
-  const MaterialProperty<Real> & _dgamma_dv2;
+  const MaterialProperty<Real> & _dgamma_dm;
 };

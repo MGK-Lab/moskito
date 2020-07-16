@@ -3,7 +3,7 @@
   dim = 1
   xmin = 0
   xmax = 300
-  nx = 300
+  nx = 100
 []
 
 [UserObjects]
@@ -47,7 +47,7 @@
     # manual_friction_factor = 0
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'well_velocity void_fraction density temperature gas_velocity liquid_velocity '
+    output_properties = 'drift_velocity well_velocity void_fraction density temperature gas_velocity liquid_velocity '
   [../]
 []
 

@@ -59,13 +59,7 @@ MoskitoMomentum_2p1c::MoskitoMomentum_2p1c(const InputParameters & parameters)
     _well_sign(getMaterialProperty<Real>("flow_direction_sign")),
     _dgamma_dp(getMaterialProperty<Real>("dgamma_dp")),
     _dgamma_dh(getMaterialProperty<Real>("dgamma_dh")),
-    _dgamma_dv(getMaterialProperty<Real>("dgamma_dv")),
-    _dgamma_dph(getMaterialProperty<Real>("dgamma_dph")),
-    _dgamma_dpv(getMaterialProperty<Real>("dgamma_dpv")),
-    _dgamma_dhv(getMaterialProperty<Real>("dgamma_dhv")),
-    _dgamma_dp2(getMaterialProperty<Real>("dgamma_dp2")),
-    _dgamma_dh2(getMaterialProperty<Real>("dgamma_dh2")),
-    _dgamma_dv2(getMaterialProperty<Real>("dgamma_dv2"))
+    _dgamma_dm(getMaterialProperty<Real>("dgamma_dm"))
 {
 }
 
@@ -84,7 +78,7 @@ MoskitoMomentum_2p1c::computeQpResidual()
   r -= _rho[_qp] * _gravity[_qp];
   r += _dgamma_dh[_qp] * _grad_h[_qp];
   r += _dgamma_dp[_qp] * _grad_u[_qp];
-  r += _dgamma_dv[_qp] * _grad_m[_qp] / (_rho[_qp] * _area[_qp]);
+  r += _dgamma_dm[_qp] * _grad_m[_qp];
 
   return r * _well_dir[_qp] * _test[_i][_qp];
 }
@@ -108,13 +102,7 @@ MoskitoMomentum_2p1c::computeQpJacobian()
         * _rho[_qp] * _rho[_qp] * a2);
   j += _grad_phi[_j][_qp];
   j -= _drho_dp[_qp] * _phi[_j][_qp] * _gravity[_qp];
-
-  j += _dgamma_dph[_qp] * _phi[_j][_qp] * _grad_h[_qp];
   j += _dgamma_dp[_qp] * _grad_phi[_j][_qp];
-  j += _dgamma_dp2[_qp] * _phi[_j][_qp] * _grad_u[_qp];
-  j += _dgamma_dpv[_qp] * _phi[_j][_qp] * _grad_m[_qp] / (_rho[_qp] * _area[_qp]);
-  j += _dgamma_dv[_qp] * _grad_m[_qp] * -_drho_dp[_qp] *_phi[_j][_qp]
-        / (_rho[_qp] * _rho[_qp] * _area[_qp]);
 
   return j * _well_dir[_qp] * _test[_i][_qp];
 }
@@ -133,11 +121,7 @@ MoskitoMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
           / (_rho[_qp] * a2);
     j += _well_sign[_qp] * _well_dir[_qp] * _f[_qp] * 2.0 * _m[_qp]
           * _phi[_j][_qp] * _perimeter[_qp] / (8.0 * _area[_qp] * _rho[_qp] * a2);
-
-    j += _dgamma_dhv[_qp] * _phi[_j][_qp] * _grad_h[_qp] / (_rho[_qp] * _area[_qp]);
-    j += _dgamma_dpv[_qp] * _phi[_j][_qp] * _grad_u[_qp] / (_rho[_qp] * _area[_qp]);
-    j += _dgamma_dv2[_qp] * _phi[_j][_qp] * _grad_m[_qp] / (_rho[_qp] * _area[_qp] * _rho[_qp] * _area[_qp]);
-    j += _dgamma_dv[_qp] * _grad_phi[_j][_qp] / (_rho[_qp] * _area[_qp]);
+    j += _dgamma_dm[_qp] * _grad_phi[_j][_qp];
   }
 
   if (jvar == _h_var_number)
@@ -154,13 +138,7 @@ MoskitoMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
           * _perimeter[_qp] * -_drho_dh[_qp] *_phi[_j][_qp] / (8.0 * _area[_qp]
           * _rho[_qp] * _rho[_qp] * a2);
     j -= _drho_dh[_qp] * _phi[_j][_qp] * _gravity[_qp];
-
-    j += _dgamma_dh2[_qp] * _phi[_j][_qp] * _grad_h[_qp];
     j += _dgamma_dh[_qp] * _grad_phi[_j][_qp];
-    j += _dgamma_dph[_qp] * _phi[_j][_qp] * _grad_u[_qp];
-    j += _dgamma_dhv[_qp] * _phi[_j][_qp] * _grad_m[_qp] / (_rho[_qp] * _area[_qp]);
-    j += _dgamma_dv[_qp] * _grad_m[_qp] * -_drho_dh[_qp] *_phi[_j][_qp]
-          / (_rho[_qp] * _rho[_qp] * _area[_qp]);
   }
 
   return j * _well_dir[_qp] * _test[_i][_qp];
