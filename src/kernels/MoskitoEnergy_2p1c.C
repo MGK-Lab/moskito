@@ -86,15 +86,15 @@ MoskitoEnergy_2p1c::computeQpResidual()
 
   r += (_u[_qp] + 1.5 * std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 2.0))
         * _grad_m[_qp];
-  r -= _m[_qp] * _gravity[_qp];
+  // r -= _m[_qp] * _gravity[_qp];
   r /= _area[_qp];
   r += (_m[_qp] / _area[_qp] - std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 3.0)
         * _drho_dh[_qp]) * _grad_u[_qp];
   r -= std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 3.0) * _drho_dp[_qp]
         * _grad_p[_qp];
-  // r += _dkappa_dh[_qp] * _grad_u[_qp];
+  r += _dkappa_dh[_qp] * _grad_u[_qp];
   // r += _dkappa_dp[_qp] * _grad_p[_qp];
-  // r += _dkappa_dm[_qp] * _grad_m[_qp];
+  r += _dkappa_dm[_qp] * _grad_m[_qp];
   r *= _well_sign[_qp];
   // r += _domega_dh[_qp] * _grad_u[_qp] + _domega_dp[_qp] * _grad_p[_qp] + _domega_dq[_qp] * _grad_q[_qp];
 
@@ -116,7 +116,7 @@ MoskitoEnergy_2p1c::computeQpJacobian()
   j -= std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 3.0) * (_drho_dph[_qp]
         - 3.0 * _drho_dp[_qp] * _drho_dh[_qp] / _rho[_qp]) * _phi[_j][_qp]
         * _grad_p[_qp];
-  // j += _dkappa_dh[_qp] * _grad_phi[_j][_qp];
+  j += _dkappa_dh[_qp] * _grad_phi[_j][_qp];
   // j += _dkappa_dph[_qp] * _phi[_j][_qp] * _grad_p[_qp];
   j *= _well_sign[_qp];
   // j += (_domega_dh2[_qp] * _grad_u[_qp] + _domega_dph[_qp] * _grad_p[_qp] + _domega_dhq[_qp] * _grad_q[_qp]) * _phi[_j][_qp];
@@ -136,14 +136,14 @@ MoskitoEnergy_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
           * _phi[_j][_qp] * _grad_m[_qp];
     j += (_u[_qp] + 1.5 * std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 2.0))
           * _grad_phi[_j][_qp];
-    j -= _phi[_j][_qp] * _gravity[_qp];
+    // j -= _phi[_j][_qp] * _gravity[_qp];
     j /= _area[_qp];
     j += (1.0 / _area[_qp] - 3.0 * std::pow(_m[_qp] / (_rho[_qp]
           * _area[_qp]), 2.0) * _drho_dh[_qp] / (_rho[_qp] * _area[_qp]))
           * _phi[_j][_qp] * _grad_u[_qp];
     j -= 3.0 * std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 2.0) * _drho_dp[_qp]
           / (_rho[_qp] * _area[_qp]) * _phi[_j][_qp] * _grad_p[_qp];
-    // j += _dkappa_dm[_qp] * _grad_phi[_j][_qp];
+    j += _dkappa_dm[_qp] * _grad_phi[_j][_qp];
     j *= _well_sign[_qp];
 
   //   j += (_domega_dhq[_qp] * _grad_u[_qp] + _domega_dpq[_qp] * _grad_p[_qp] + _domega_dq2[_qp] * _grad_q[_qp]) * _phi[_j][_qp];
