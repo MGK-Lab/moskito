@@ -42,7 +42,7 @@ MoskitoLateralHeat_1p::MoskitoLateralHeat_1p(const InputParameters & parameters)
   _rto(getMaterialProperty<Real>("radius_tubbing_outer")),
   _Uto(getMaterialProperty<Real>("thermal_resistivity_well")),
   _Twb(getMaterialProperty<Real>("temperature_well_formation_interface")),
-  _diameter_liquid(getMaterialProperty<Real>("well_diameter"))
+  _area(getMaterialProperty<Real>("well_area"))
   {
   }
 
@@ -51,7 +51,7 @@ MoskitoLateralHeat_1p::computeQpResidual()
 {
   Real r = 0.0;
   r =  2.0 * PI * _rto[_qp] * _Uto[_qp] * (_u[_qp] - _Twb[_qp]);
-  r /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
+  r /=  _area[_qp];
 
   return  r * _test[_i][_qp];
 }
@@ -61,7 +61,7 @@ MoskitoLateralHeat_1p::computeQpJacobian()
 {
   Real j = 0.0;
   j =  2.0 * PI * _rto[_qp] * _Uto[_qp] * _phi[_j][_qp];
-  j /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
+  j /=  _area[_qp];
 
   return  j * _test[_i][_qp];
 }
