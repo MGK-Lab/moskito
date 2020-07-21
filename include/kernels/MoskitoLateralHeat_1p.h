@@ -46,10 +46,6 @@ protected:
   // Temperature at formation - cement boundary
   const MaterialProperty<Real> & _Twb;
   // Diameter filled with liquid = _rti
-  const MaterialProperty<Real> & _diameter_liquid;
-  const Real gradC_to_gradR = 1.8;
-  const Real Watt_to_Btu_per_h = 3.412141633;
-  const Real m_to_ft    = 3.280839895;
-  const Real Rankine_absol = 491.67;
+  const MaterialProperty<Real> & _area;
   const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
