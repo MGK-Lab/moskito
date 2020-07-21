@@ -70,13 +70,13 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _dgamma_dm(declareProperty<Real>("dgamma_dm")),
     _dkappa_dp(declareProperty<Real>("dkappa_dp")),
     _dkappa_dh(declareProperty<Real>("dkappa_dh")),
-    _dkappa_dv(declareProperty<Real>("dkappa_dv")),
+    _dkappa_dm(declareProperty<Real>("dkappa_dm")),
     _dkappa_dph(declareProperty<Real>("dkappa_dph")),
-    _dkappa_dpv(declareProperty<Real>("dkappa_dpv")),
-    _dkappa_dhv(declareProperty<Real>("dkappa_dhv")),
+    _dkappa_dpm(declareProperty<Real>("dkappa_dpm")),
+    _dkappa_dhm(declareProperty<Real>("dkappa_dhm")),
     _dkappa_dp2(declareProperty<Real>("dkappa_dp2")),
     _dkappa_dh2(declareProperty<Real>("dkappa_dh2")),
-    _dkappa_dv2(declareProperty<Real>("dkappa_dv2")),
+    _dkappa_dm2(declareProperty<Real>("dkappa_dm2")),
     _domega_dp(declareProperty<Real>("domega_dp")),
     _domega_dh(declareProperty<Real>("domega_dh")),
     _domega_dv(declareProperty<Real>("domega_dv")),
@@ -166,7 +166,7 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & m)
   Real vmfrac, T, phase, gamma = 0.0;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
 
-  if(phase == 2.0)
+  if(phase == 2.0 && m != 0.0)
   {
     Real vfrac, rho_l, rho_g, rho_m, rho_pam;
     rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
@@ -184,12 +184,12 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & m)
 }
 
 Real
-MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & v)
+MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & m)
 {
   Real vmfrac, T, phase, kappa = 0.0;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
 
-  if(phase == 2.0)
+  if(phase == 2.0 && m != 0.0)
   {
     Real vfrac, rho_l, rho_g, rho_m, rho_pam, h_g, h_l, dummy;
     rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
@@ -200,7 +200,7 @@ MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & v)
     eos_uo.h_lat(p, dummy, h_l, h_g);
 
     kappa  = vfrac * rho_g * rho_l / rho_pam * (h_g - h_l);
-    kappa *= (_c0[_qp] - 1.0) * v * _well_sign[_qp] + _u_d[_qp];
+    kappa *= (_c0[_qp] - 1.0) * (m / rho_m / _area[_qp]) + _u_d[_qp];
   }
 
   return kappa;
@@ -276,72 +276,71 @@ MoskitoFluidWell_2p1c::GammaDerivatives()
 void
 MoskitoFluidWell_2p1c::KappaDerivatives()
 {
-  _dkappa_dp[_qp] = 0.0; _dkappa_dh[_qp] = 0.0; _dkappa_dv[_qp] = 0.0;
-  _dkappa_dph[_qp] = 0.0; _dkappa_dpv[_qp] = 0.0; _dkappa_dhv[_qp] = 0.0;
-  _dkappa_dp2[_qp] = 0.0; _dkappa_dh2[_qp] = 0.0; _dkappa_dv2[_qp] = 0.0;
+  _dkappa_dp[_qp] = 0.0; _dkappa_dh[_qp] = 0.0; _dkappa_dm[_qp] = 0.0;
+  _dkappa_dph[_qp] = 0.0; _dkappa_dpm[_qp] = 0.0; _dkappa_dhm[_qp] = 0.0;
+  _dkappa_dp2[_qp] = 0.0; _dkappa_dh2[_qp] = 0.0; _dkappa_dm2[_qp] = 0.0;
 
   if (_phase[_qp] == 2.0)
   {
-    Real dh, dv, dp;
+    Real dh, dm, dp;
     Real tol = 1.0e-3;
-    dh = tol * _h[_qp]; dp = tol * _P[_qp]; dv = tol * _u[_qp];
+    dh = tol * _h[_qp]; dp = tol * _P[_qp]; dm = tol * _m[_qp];
 
     if (dh != 0.0)
     {
-      _dkappa_dh[_qp]  = kappa(_h[_qp] + dh, _P[_qp], _u[_qp]) - kappa(_h[_qp] - dh, _P[_qp], _u[_qp]);
+      _dkappa_dh[_qp]  = kappa(_h[_qp] + dh, _P[_qp], _m[_qp]) - kappa(_h[_qp] - dh, _P[_qp], _m[_qp]);
       _dkappa_dh[_qp] /= 2.0 * dh;
     }
 
     if (dp != 0.0)
     {
-    _dkappa_dp[_qp]  = kappa(_h[_qp], _P[_qp] + dp, _u[_qp]) - kappa(_h[_qp], _P[_qp] - dp, _u[_qp]);
+    _dkappa_dp[_qp]  = kappa(_h[_qp], _P[_qp] + dp, _m[_qp]) - kappa(_h[_qp], _P[_qp] - dp, _m[_qp]);
     _dkappa_dp[_qp] /= 2.0 * dp;
     }
 
-    if (dv != 0.0)
+    if (dm != 0.0)
     {
-    _dkappa_dv[_qp]  = kappa(_h[_qp], _P[_qp], _u[_qp] + dv) - kappa(_h[_qp], _P[_qp], _u[_qp] - dv);
-    _dkappa_dv[_qp] /= 2.0 * dv;
+    _dkappa_dm[_qp]  = kappa(_h[_qp], _P[_qp], _m[_qp] + dm) - kappa(_h[_qp], _P[_qp], _m[_qp] - dm);
+    _dkappa_dm[_qp] /= 2.0 * dm;
     }
-
     if (dp * dh != 0.0)
     {
-    _dkappa_dph[_qp]  = kappa(_h[_qp] + dh, _P[_qp] + dp, _u[_qp]) + kappa(_h[_qp] - dh, _P[_qp] - dp, _u[_qp]);
-    _dkappa_dph[_qp] -= kappa(_h[_qp] + dh, _P[_qp] - dp, _u[_qp]) + kappa(_h[_qp] - dh, _P[_qp] + dp, _u[_qp]);
+    _dkappa_dph[_qp]  = kappa(_h[_qp] + dh, _P[_qp] + dp, _m[_qp]) + kappa(_h[_qp] - dh, _P[_qp] - dp, _m[_qp]);
+    _dkappa_dph[_qp] -= kappa(_h[_qp] + dh, _P[_qp] - dp, _m[_qp]) + kappa(_h[_qp] - dh, _P[_qp] + dp, _m[_qp]);
     _dkappa_dph[_qp] /= 4.0 * dh * dp;
     }
 
-    if (dh * dv != 0.0)
+    if (dh * dm != 0.0)
     {
-    _dkappa_dhv[_qp]  = kappa(_h[_qp] + dh, _P[_qp], _u[_qp] + dv) + kappa(_h[_qp] - dh, _P[_qp], _u[_qp] - dv);
-    _dkappa_dhv[_qp] -= kappa(_h[_qp] + dh, _P[_qp], _u[_qp] - dv) + kappa(_h[_qp] - dh, _P[_qp], _u[_qp] + dv);
-    _dkappa_dhv[_qp] /= 4.0 * dh * dv;
+    _dkappa_dhm[_qp]  = kappa(_h[_qp] + dh, _P[_qp], _m[_qp] + dm) + kappa(_h[_qp] - dh, _P[_qp], _m[_qp] - dm);
+    _dkappa_dhm[_qp] -= kappa(_h[_qp] + dh, _P[_qp], _m[_qp] - dm) + kappa(_h[_qp] - dh, _P[_qp], _m[_qp] + dm);
+    _dkappa_dhm[_qp] /= 4.0 * dh * dm;
     }
 
-    if (dp * dv != 0.0)
+    if (dp * dm != 0.0)
     {
-    _dkappa_dpv[_qp]  = kappa(_h[_qp], _P[_qp] + dp, _u[_qp] + dv) + kappa(_h[_qp], _P[_qp] - dp, _u[_qp] - dv);
-    _dkappa_dpv[_qp] -= kappa(_h[_qp], _P[_qp] + dp, _u[_qp] - dv) + kappa(_h[_qp], _P[_qp] - dp, _u[_qp] + dv);
-    _dkappa_dpv[_qp] /= 4.0 * dp * dv;
+    _dkappa_dpm[_qp]  = kappa(_h[_qp], _P[_qp] + dp, _m[_qp] + dm) + kappa(_h[_qp], _P[_qp] - dp, _m[_qp] - dm);
+    _dkappa_dpm[_qp] -= kappa(_h[_qp], _P[_qp] + dp, _m[_qp] - dm) + kappa(_h[_qp], _P[_qp] - dp, _m[_qp] + dm);
+    _dkappa_dpm[_qp] /= 4.0 * dp * dm;
     }
 
     if (dp != 0.0)
     {
-    _dkappa_dp2[_qp]  = kappa(_h[_qp], _P[_qp] + dp, _u[_qp]) + kappa(_h[_qp], _P[_qp] - dp, _u[_qp]);
-    _dkappa_dp2[_qp] -= 2.0 * kappa(_h[_qp], _P[_qp], _u[_qp]);
+    _dkappa_dp2[_qp]  = kappa(_h[_qp], _P[_qp] + dp, _m[_qp]) + kappa(_h[_qp], _P[_qp] - dp, _m[_qp]);
+    _dkappa_dp2[_qp] -= 2.0 * kappa(_h[_qp], _P[_qp], _m[_qp]);
     _dkappa_dp2[_qp] /=  dp * dp;
     }
     if (dh != 0.0)
     {
-    _dkappa_dh2[_qp]  = kappa(_h[_qp] + dh, _P[_qp], _u[_qp]) + kappa(_h[_qp] - dh, _P[_qp], _u[_qp]);
-    _dkappa_dh2[_qp] -= 2.0 * kappa(_h[_qp], _P[_qp], _u[_qp]);
+    _dkappa_dh2[_qp]  = kappa(_h[_qp] + dh, _P[_qp], _m[_qp]) + kappa(_h[_qp] - dh, _P[_qp], _m[_qp]);
+    _dkappa_dh2[_qp] -= 2.0 * kappa(_h[_qp], _P[_qp], _m[_qp]);
     _dkappa_dh2[_qp] /=  dh * dh;
     }
-    if (dv != 0.0)
+    if (dm != 0.0)
     {
-    _dkappa_dv2[_qp]  = kappa(_h[_qp], _P[_qp], _u[_qp] + dv) + kappa(_h[_qp], _P[_qp], _u[_qp] - dv);
-    _dkappa_dv2[_qp] -= 2.0 * kappa(_h[_qp], _P[_qp], _u[_qp]);
-    _dkappa_dv2[_qp] /=  dv * dv;
+    _dkappa_dm2[_qp]  = kappa(_h[_qp], _P[_qp], _m[_qp] + dm) + kappa(_h[_qp], _P[_qp], _m[_qp] - dm);
+    _dkappa_dm2[_qp] -= 2.0 * kappa(_h[_qp], _P[_qp], _m[_qp]);
+    _dkappa_dm2[_qp] /=  dm * dm;
     }
   }
 }

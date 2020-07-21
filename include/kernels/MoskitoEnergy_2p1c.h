@@ -80,19 +80,19 @@ protected:
   // The kappa first derivatives
   const MaterialProperty<Real> & _dkappa_dh;
   // The kappa first derivatives
-  const MaterialProperty<Real> & _dkappa_dv;
+  const MaterialProperty<Real> & _dkappa_dm;
   // The kappa second derivatives
   const MaterialProperty<Real> & _dkappa_dph;
   // The kappa second derivatives
-  const MaterialProperty<Real> & _dkappa_dpv;
+  const MaterialProperty<Real> & _dkappa_dpm;
   // The kappa second derivatives
-  const MaterialProperty<Real> & _dkappa_dhv;
+  const MaterialProperty<Real> & _dkappa_dhm;
   // The kappa second derivatives
   const MaterialProperty<Real> & _dkappa_dp2;
   // The kappa second derivatives
   const MaterialProperty<Real> & _dkappa_dh2;
   // The kappa second derivatives
-  const MaterialProperty<Real> & _dkappa_dv2;
+  const MaterialProperty<Real> & _dkappa_dm2;
 
   // The omega first derivatives
   const MaterialProperty<Real> & _domega_dp;
