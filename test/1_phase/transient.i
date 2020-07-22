@@ -85,6 +85,7 @@
     variable = T
     pressure = p
     flowrate = q
+    gravity_energy = true
   [../]
   [./Ttimekernel]
     type = MoskitoTimeEnergy_1p1c
