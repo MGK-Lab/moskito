@@ -43,8 +43,8 @@ public:
   void KappaDerivatives();
   void OmegaDerivatives();
   Real gamma(const Real & h, const Real & p, const Real & m);
-  Real kappa(const Real & h, const Real & p, const Real & v);
-  Real omega(const Real & h, const Real & p, const Real & v);
+  Real kappa(const Real & h, const Real & p, const Real & m);
+  Real omega(const Real & h, const Real & p, const Real & m);
 
 protected:
   // Userobject to equation of state
@@ -94,11 +94,9 @@ protected:
   // flow pattern
   MaterialProperty<Real> & _flow_pat;
 
-  // The gamma first derivatives
+  // The gamma derivatives
   MaterialProperty<Real> & _dgamma_dp;
-  // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dh;
-  // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dm;
 
   // The kappa first derivatives
@@ -120,24 +118,10 @@ protected:
   // The kappa second derivatives
   MaterialProperty<Real> & _dkappa_dm2;
 
-  // The omega first derivatives
+  // The omega derivatives
   MaterialProperty<Real> & _domega_dp;
-  // The omega first derivatives
   MaterialProperty<Real> & _domega_dh;
-  // The omega first derivatives
-  MaterialProperty<Real> & _domega_dv;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dph;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dpv;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dhv;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dp2;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dh2;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dv2;
+  MaterialProperty<Real> & _domega_dm;
 
   // The coupled enthalpy
   const VariableValue & _h;

@@ -94,22 +94,8 @@ protected:
   // The kappa second derivatives
   const MaterialProperty<Real> & _dkappa_dm2;
 
-  // The omega first derivatives
+  // The omega derivatives
   const MaterialProperty<Real> & _domega_dp;
-  // The omega first derivatives
   const MaterialProperty<Real> & _domega_dh;
-  // The omega first derivatives
-  const MaterialProperty<Real> & _domega_dv;
-  // The omega second derivatives
-  const MaterialProperty<Real> & _domega_dph;
-  // The omega second derivatives
-  const MaterialProperty<Real> & _domega_dpv;
-  // The omega second derivatives
-  const MaterialProperty<Real> & _domega_dhv;
-  // The omega second derivatives
-  const MaterialProperty<Real> & _domega_dp2;
-  // The omega second derivatives
-  const MaterialProperty<Real> & _domega_dh2;
-  // The omega second derivatives
-  const MaterialProperty<Real> & _domega_dv2;
+  const MaterialProperty<Real> & _domega_dm;
 };
