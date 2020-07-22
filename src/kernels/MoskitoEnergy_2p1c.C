@@ -33,8 +33,10 @@ validParams<MoskitoEnergy_2p1c>()
 
   params.addRequiredCoupledVar("massrate", "Massrate nonlinear variable");
   params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable");
+  params.addParam<bool>("gravity_energy", false, "Consider potential energy "
+          "caused by gravity acceleration");
   params.addClassDescription("Energy conservation equation for 2 phase "
-                                      "pipe flow and it returns enthalpy");
+          "pipe flow and it returns enthalpy");
 
   return params;
 }
@@ -57,6 +59,7 @@ MoskitoEnergy_2p1c::MoskitoEnergy_2p1c(const InputParameters & parameters)
   _drho_dp2(getMaterialProperty<Real>("drho_dp2")),
   _drho_dh2(getMaterialProperty<Real>("drho_dh2")),
   _drho_dph(getMaterialProperty<Real>("drho_dph")),
+  _add_g(getParam<bool>("gravity_energy")),
   _gravity(getMaterialProperty<RealVectorValue>("gravity")),
   _dkappa_dp(getMaterialProperty<Real>("dkappa_dp")),
   _dkappa_dh(getMaterialProperty<Real>("dkappa_dh")),
@@ -71,6 +74,10 @@ MoskitoEnergy_2p1c::MoskitoEnergy_2p1c(const InputParameters & parameters)
   _domega_dh(getMaterialProperty<Real>("domega_dh")),
   _domega_dm(getMaterialProperty<Real>("domega_dm"))
 {
+  if(_add_g)
+    _gfac = 1.0;
+  else
+    _gfac = 0.0;
 }
 
 Real
@@ -80,7 +87,7 @@ MoskitoEnergy_2p1c::computeQpResidual()
 
   r += (_u[_qp] + 1.5 * std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 2.0))
         * _grad_m[_qp];
-  // r -= _m[_qp] * _gravity[_qp];
+  r -= _gfac * _m[_qp] * _gravity[_qp];
   r /= _area[_qp];
   r += (_m[_qp] / _area[_qp] - std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 3.0)
         * _drho_dh[_qp]) * _grad_u[_qp];
@@ -127,7 +134,7 @@ MoskitoEnergy_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
           * _phi[_j][_qp] * _grad_m[_qp];
     j += (_u[_qp] + 1.5 * std::pow(_m[_qp] / (_rho[_qp] * _area[_qp]), 2.0))
           * _grad_phi[_j][_qp];
-    // j -= _phi[_j][_qp] * _gravity[_qp];
+    j -= _gfac * _phi[_j][_qp] * _gravity[_qp];
     j /= _area[_qp];
     j += (1.0 / _area[_qp] - 3.0 * std::pow(_m[_qp] / (_rho[_qp]
           * _area[_qp]), 2.0) * _drho_dh[_qp] / (_rho[_qp] * _area[_qp]))

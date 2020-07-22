@@ -73,6 +73,8 @@ protected:
   const MaterialProperty<Real> & _drho_dph;
 
   // The gravity acceleration as a vector
+  const bool & _add_g;
+  Real _gfac;
   const MaterialProperty<RealVectorValue> & _gravity;
 
   // The kappa first derivatives
