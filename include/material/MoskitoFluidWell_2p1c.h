@@ -42,9 +42,9 @@ public:
   void GammaDerivatives();
   void KappaDerivatives();
   void OmegaDerivatives();
-  Real gamma(const Real & h, const Real & p, const Real & q);
-  Real kappa(const Real & h, const Real & p, const Real & q);
-  Real omega(const Real & h, const Real & p, const Real & q);
+  Real gamma(const Real & h, const Real & p, const Real & m);
+  Real kappa(const Real & h, const Real & p, const Real & m);
+  Real omega(const Real & h, const Real & p, const Real & m);
 
 protected:
   // Userobject to equation of state
@@ -69,11 +69,11 @@ protected:
   // The first derivative of mixture density wrt pressure
   MaterialProperty<Real> & _drho_m_dp;
   // The second derivative of mixture density wrt pressure
-  MaterialProperty<Real> & _drho_m_dp_2;
+  MaterialProperty<Real> & _drho_m_dp2;
   // The first derivative of mixture density wrt enthalpy
   MaterialProperty<Real> & _drho_m_dh;
   // The second derivative of mixture density wrt enthalpy
-  MaterialProperty<Real> & _drho_m_dh_2;
+  MaterialProperty<Real> & _drho_m_dh2;
   // The second derivative of mixture density wrt enthalpy and pressure
   MaterialProperty<Real> & _drho_m_dph;
   // mass_fraction
@@ -94,68 +94,41 @@ protected:
   // flow pattern
   MaterialProperty<Real> & _flow_pat;
 
-  // The gamma first derivatives
+  // The gamma derivatives
   MaterialProperty<Real> & _dgamma_dp;
-  // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dh;
-  // The gamma first derivatives
-  MaterialProperty<Real> & _dgamma_dq;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dph;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dpq;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dhq;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dp2;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dh2;
-  // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma_dq2;
+  MaterialProperty<Real> & _dgamma_dm;
 
   // The kappa first derivatives
   MaterialProperty<Real> & _dkappa_dp;
   // The kappa first derivatives
   MaterialProperty<Real> & _dkappa_dh;
   // The kappa first derivatives
-  MaterialProperty<Real> & _dkappa_dq;
+  MaterialProperty<Real> & _dkappa_dm;
   // The kappa second derivatives
   MaterialProperty<Real> & _dkappa_dph;
   // The kappa second derivatives
-  MaterialProperty<Real> & _dkappa_dpq;
+  MaterialProperty<Real> & _dkappa_dpm;
   // The kappa second derivatives
-  MaterialProperty<Real> & _dkappa_dhq;
+  MaterialProperty<Real> & _dkappa_dhm;
   // The kappa second derivatives
   MaterialProperty<Real> & _dkappa_dp2;
   // The kappa second derivatives
   MaterialProperty<Real> & _dkappa_dh2;
   // The kappa second derivatives
-  MaterialProperty<Real> & _dkappa_dq2;
+  MaterialProperty<Real> & _dkappa_dm2;
 
-  // The omega first derivatives
+  // The omega derivatives
   MaterialProperty<Real> & _domega_dp;
-  // The omega first derivatives
   MaterialProperty<Real> & _domega_dh;
-  // The omega first derivatives
-  MaterialProperty<Real> & _domega_dq;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dph;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dpq;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dhq;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dp2;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dh2;
-  // The omega second derivatives
-  MaterialProperty<Real> & _domega_dq2;
+  MaterialProperty<Real> & _domega_dm;
 
   // The coupled enthalpy
   const VariableValue & _h;
+  const VariableValue & _m;
 
   // The gradient of the coupled variables
-  const VariableGradient & _grad_flow;
+  const VariableGradient & _grad_m;
   const VariableGradient & _grad_h;
   const VariableGradient & _grad_p;
 };

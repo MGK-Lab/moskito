@@ -2,8 +2,8 @@
   type = GeneratedMesh
   dim = 1
   xmin = 0
-  xmax = 100
-  nx = 50
+  xmax = 300
+  nx = 100
 []
 
 [UserObjects]
@@ -12,7 +12,8 @@
     viscosity = 0.0001
   [../]
   [./viscosity_liqid]
-    type = MoskitoViscosityWaterSmith
+    type = MoskitoViscosityConst
+    viscosity = 0.001
   [../]
   [./viscosity_2p]
     type = MoskitoViscosity2P
@@ -33,91 +34,64 @@
 [Materials]
   [./area]
     type = MoskitoFluidWell_2p1c
+    well_diameter = 0.1
     pressure = p
     enthalpy = h
-    flowrate = q
-    well_type = production
+    massrate = m
     well_direction = x
-    well_diameter = 0.0890016
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
     roughness_type = smooth
-    gravity = '10 0 0'
+    gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'void_fraction temperature'
-  [../]
-[]
-
-[Variables]
-  [./p]
-    initial_condition = 2e6
-    # scaling = 1e-3
-  [../]
-  [./h]
-    initial_condition = 2e5
-    # scaling = 1e-5
-  [../]
-  [./q]
+    output_properties = 'drift_velocity well_velocity void_fraction density temperature gas_velocity liquid_velocity '
   [../]
 []
 
 [BCs]
   [./pbc]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = p
     boundary = left
-    value = '2e6'
+    function = 'if(t<=10,2e5-1e4*t,1e5)'
   [../]
-  [./qbc]
+  [./mbc]
     type = FunctionDirichletBC
-    variable = q
+    variable = m
     boundary = left
-    function = 'if(t>20,0.01,0.00001)'
+    function = 'if(t<10,0,0.15*(t-10))'
   [../]
-  [./hbc]
-    type = DirichletBC
-    variable = h
-    boundary = right
-    value = 5.3e5
+[]
+
+[Variables]
+  [./p]
+    initial_condition = 2e5
+  [../]
+  [./m]
+    initial_condition = 0.0
+  [../]
+[]
+
+[AuxVariables]
+  [./h]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 5e5
   [../]
 []
 
 [Kernels]
-  [./hkernel]
-    type = MoskitoEnergy_2p1c
-    variable = h
-    pressure = p
-    flowrate = q
-  [../]
-  [./htimekernel]
-    type = MoskitoTimeEnergy_2p1c
-    variable = h
-    pressure = p
-    flowrate = q
-  [../]
   [./pkernel]
-    type = MoskitoMass_2p1c
-    variable = p
-    flowrate = q
-    enthalpy = h
-  [../]
-  [./ptimekernel]
-    type = MoskitoTimeMass_2p1c
-    variable = p
-    enthalpy = h
-  [../]
-  [./qkernel]
     type = MoskitoMomentum_2p1c
-    variable = q
-    pressure = p
+    variable = p
+    massrate = m
     enthalpy = h
   [../]
-  [./qtimekernel]
-    type = MoskitoTimeMomentum_2p1c
-    variable = q
-    pressure = p
-    enthalpy = h
+  [./mkernel]
+    type = MoskitoMass_2p1c
+    variable = m
   [../]
 []
 
@@ -138,31 +112,33 @@
 []
 
 [Dampers]
-  # [./test]
-  #   type = MaxIncrement
-  #   variable = h
-  #   max_increment = 0.1
-  #   increment_type = fractional
-  # [../]
-  # [./test]
-  #   type = BoundingValueNodalDamper
-  #   variable = p
-  #   min_value = 1e4
-  # [../]
+  [./p]
+    type = BoundingValueNodalDamper
+    variable = p
+    min_value = 1e4
+    max_value = 5e6
+    min_damping = 1e-5
+  [../]
 []
 
 [Executioner]
   type = Transient
-  dt = 1
-  end_time = 120
+  dt = 5
+  end_time = 20
   l_max_its = 50
   nl_max_its = 50
   l_tol = 1e-8
   nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
   solve_type = NEWTON
   automatic_scaling = true
   compute_scaling_once = false
+  [./Quadrature]
+    type = GAUSS
+    element_order = FIRST
+  [../]
 []
+
 
 [Outputs]
   exodus = true

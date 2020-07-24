@@ -60,8 +60,6 @@ protected:
 
   // The coupled pressure
   const VariableValue & _P;
-  // The coupled flow rate
-  const VariableValue & _flow;
 
   // function to calculate friction factor using Moody chart
   void MoodyFrictionFactor(Real & friction, Real rel_roughness, Real ReNo, MooseEnum roughness_type);

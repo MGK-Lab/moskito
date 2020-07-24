@@ -21,26 +21,34 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOMASSFLOWRATE_H
-#define MOSKITOMASSFLOWRATE_H
+#pragma once
 
-#include "NodalBC.h"
+#include "GeneralUserObject.h"
+#include "RankTwoTensor.h"
 
-class MoskitoMassFlowRate;
+class MoskitoSUPG;
 
 template <>
-InputParameters validParams<MoskitoMassFlowRate>();
+InputParameters validParams<MoskitoSUPG>();
 
-class MoskitoMassFlowRate : public NodalBC
+class MoskitoSUPG : public GeneralUserObject
 {
 public:
-  MoskitoMassFlowRate(const InputParameters & parameters);
+  MoskitoSUPG(const InputParameters & parameters);
+
+  virtual void execute();
+  virtual void initialize();
+  virtual void finalize();
+
+  void SUPGCalculator(const Real & diff, const Real & dt, const Elem * ele, const RealVectorValue & v, RealVectorValue & SUPG_coeff, Real & alpha, Real & CrNr) const;
+  Real tau(const Real & alpha, const Real & diff, const Real & dt, const Real & v, const Real & h) const;
 
 protected:
-  virtual Real computeQpResidual() override;
+  Real Optimal(const Real & alpha) const;
+  Real Temporal(const Real & v, const Real & h, const Real & diff, const Real & dt) const;
+  Real DoublyAsymptotic(const Real & alpha) const;
+  Real Critical(const Real & alpha) const;
 
-  const Real & _m_dot;
-  const Real & _rho_m;
+  MooseEnum _method;
+  enum M {optimal, doubly_asymptotic, critical, transient_brooks, transient_tezduyar};
 };
-
-#endif // MOSKITOMASSFLOWRATE_H

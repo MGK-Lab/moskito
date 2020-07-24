@@ -2,8 +2,8 @@
   type = GeneratedMesh
   dim = 1
   xmin = 0
-  xmax = 3000
-  nx = 100
+  xmax = 300
+  nx = 300
 []
 
 [UserObjects]
@@ -28,7 +28,6 @@
   [../]
   [./eos]
     type = MoskitoPureWater2P
-    derivative_tolerance = 1e-5
   [../]
 []
 
@@ -38,7 +37,7 @@
     well_diameter = 0.1
     pressure = p
     enthalpy = h
-    flowrate = q
+    massrate = m
     well_direction = x
     well_type = production
     eos_uo = eos
@@ -47,33 +46,31 @@
     roughness_type = smooth
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'profile_mixture_density gas_velocity liquid_velocity void_fraction mass_fraction flow_pattern current_phase gas_density liquid_density density temperature well_velocity flow_type_c0 drift_velocity'
+    output_properties = 'void_fraction current_phase density temperature'
   [../]
 []
 
 [BCs]
   [./pbc]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = p
     boundary = left
-    value = 1e5
+    function = 'if(t<=10,2e5-1e4*t,1e5)'
   [../]
-  [./qbc]
-    type = DirichletBC
-    variable = q
+  [./mbc]
+    type = FunctionDirichletBC
+    variable = m
     boundary = left
-    value = 0.01
+    function = 'if(t<10,0,if(t<20,0.15*(t-10),1.5))'
   [../]
 []
 
 [Variables]
   [./p]
-    [./InitialCondition]
-      type = FunctionIC
-      function = '90000+400*x'
-    [../]
+    initial_condition = 2e5
   [../]
-  [./q]
+  [./m]
+    initial_condition = 0.0
   [../]
 []
 
@@ -87,17 +84,26 @@
 
 [Kernels]
   [./pkernel]
-    type = MoskitoMass_2p1c
-    variable = p
-    flowrate = q
-    enthalpy = h
-  [../]
-  [./qkernel]
     type = MoskitoMomentum_2p1c
-    variable = q
-    pressure = p
+    variable = p
+    massrate = m
     enthalpy = h
   [../]
+  [./ptkernel]
+    type = MoskitoTimeMomentum_2p1c
+    variable = p
+    massrate = m
+  [../]
+  [./mkernel]
+    type = MoskitoMass_2p1c
+    variable = m
+  [../]
+  # [./mtkernel]
+  #   type = MoskitoTimeMass_2p1c
+  #   variable = m
+  #   pressure = p
+  #   enthalpy = h
+  # [../]
 []
 
 [Preconditioning]
@@ -117,28 +123,33 @@
 []
 
 [Dampers]
-  # [./test]
-  #   type = MaxIncrement
-  #   variable = p
-  #   max_increment = 0.1
-  #   increment_type = fractional
-  # [../]
-  # [./test]
-  #   type = BoundingValueNodalDamper
-  #   variable = p
-  #   min_value = 1e4
-  # [../]
+  [./p]
+    type = BoundingValueNodalDamper
+    variable = p
+    min_value = 1e4
+    max_value = 5e6
+    min_damping = 1e-5
+  [../]
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  dt = 5
+  end_time = 40
   l_max_its = 50
   nl_max_its = 50
   l_tol = 1e-8
   nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-8
   solve_type = NEWTON
   automatic_scaling = true
+  compute_scaling_once = false
+  [./Quadrature]
+    type = GAUSS
+    element_order = FIRST
+  [../]
 []
+
 
 [Outputs]
   exodus = true

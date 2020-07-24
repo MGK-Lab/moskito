@@ -57,4 +57,6 @@ protected:
 
   // The coupled temperature
   const VariableValue & _T;
+  // The coupled flow rate
+  const VariableValue & _flow;
 };

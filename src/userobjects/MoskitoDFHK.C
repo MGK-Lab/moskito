@@ -6,6 +6,7 @@
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
 /*  This file is part of MOSKITO App                                      */
+/*  Co-developed by Sebastian Held                                        */
 /*                                                                        */
 /*  This program is free software: you can redistribute it and/or modify  */
 /*  it under the terms of the GNU General Public License as published by  */
@@ -46,7 +47,7 @@ void
 MoskitoDFHK::DFMCalculator(MoskitoDFGVar & input) const
 {
   // To avoid calculation for 1 phase flow and return correct value for DF method
-  if (input._mfrac > 0.0 && input._mfrac < 1.0)
+  if (input._mfrac > 0.0 && input._mfrac < 1.0 && input._v_m > 0.0)
   {
     // conversion SI --> American petroleum units
     input._rho_g *= kg_to_lbm / m3_to_ft3;

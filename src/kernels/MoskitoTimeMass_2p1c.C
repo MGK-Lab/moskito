@@ -31,22 +31,26 @@ validParams<MoskitoTimeMass_2p1c>()
 {
   InputParameters params = validParams<TimeKernel>();
 
-  params.addRequiredCoupledVar("enthalpy", "Enthalpy nonlinear variable");
+  params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable");
+  params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable");
   params.addClassDescription("Time derivative part of mass conservation equation for "
-                  "2 phase pipe flow and it returns pressure");
+                  "2 phase pipe flow and it returns massrate");
 
   return params;
 }
 
 MoskitoTimeMass_2p1c::MoskitoTimeMass_2p1c(const InputParameters & parameters)
   : TimeKernel(parameters),
+  _p_dot(coupledDot("pressure")),
+  _dp_dot(coupledDotDu("pressure")),
+  _p_var_number(coupled("pressure")),
   _h_dot(coupledDot("enthalpy")),
   _dh_dot(coupledDotDu("enthalpy")),
   _h_var_number(coupled("enthalpy")),
   _drho_dp(getMaterialProperty<Real>("drho_dp")),
+  _drho_dp2(getMaterialProperty<Real>("drho_dp2")),
   _drho_dh(getMaterialProperty<Real>("drho_dh")),
-  _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
-  _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+  _drho_dh2(getMaterialProperty<Real>("drho_dh2")),
   _drho_dph(getMaterialProperty<Real>("drho_dph"))
 {
 }
@@ -56,7 +60,7 @@ MoskitoTimeMass_2p1c::computeQpResidual()
 {
   Real r = 0.0;
 
-  r += _drho_dp[_qp] * _u_dot[_qp];
+  r += _drho_dp[_qp] * _p_dot[_qp];
   r += _drho_dh[_qp] * _h_dot[_qp];
   r *= _test[_i][_qp];
 
@@ -66,14 +70,7 @@ MoskitoTimeMass_2p1c::computeQpResidual()
 Real
 MoskitoTimeMass_2p1c::computeQpJacobian()
 {
-  Real j = 0.0;
-
-  j += _drho_dp_2[_qp] * _u_dot[_qp];
-  j += _drho_dp[_qp] * _du_dot_du[_qp];
-  j += _drho_dph[_qp] * _h_dot[_qp];
-  j *= _test[_i][_qp] * _phi[_j][_qp];
-
-  return j;
+  return 0.0;
 }
 
 Real
@@ -81,10 +78,17 @@ MoskitoTimeMass_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real j = 0.0;
 
+  if (jvar == _p_var_number)
+  {
+    j += _drho_dp2[_qp] * _p_dot[_qp];
+    j += _drho_dp[_qp] * _dp_dot[_qp];
+    j += _drho_dph[_qp] * _h_dot[_qp];
+    j *= _test[_i][_qp] * _phi[_j][_qp];
+  }
   if (jvar == _h_var_number)
   {
-    j += _drho_dph[_qp] * _u_dot[_qp];
-    j += _drho_dh_2[_qp] * _h_dot[_qp];
+    j += _drho_dph[_qp] * _p_dot[_qp];
+    j += _drho_dh2[_qp] * _h_dot[_qp];
     j += _drho_dh[_qp] * _dh_dot[_qp];
     j *= _test[_i][_qp] * _phi[_j][_qp];
   }
