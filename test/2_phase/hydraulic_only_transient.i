@@ -44,10 +44,9 @@
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
     roughness_type = smooth
-    # manual_friction_factor = 0
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'void_fraction current_phase density temperature dgamma_dp dgamma_dv dgamma_dh dgamma_dp2 dgamma_dv2 dgamma_dh2 dgamma_dph dgamma_dpv dgamma_dhv'
+    output_properties = 'void_fraction current_phase density temperature'
   [../]
 []
 
@@ -145,8 +144,6 @@
   solve_type = NEWTON
   automatic_scaling = true
   compute_scaling_once = false
-  # steady_state_detection = true
-  # steady_state_tolerance = 1e-02
   [./Quadrature]
     type = GAUSS
     element_order = FIRST
@@ -155,7 +152,5 @@
 
 
 [Outputs]
-  # execute_on = 'INITIAL NONLINEAR TIMESTEP_END '
-  print_linear_residuals = false
   exodus = true
 []

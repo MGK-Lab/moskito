@@ -44,7 +44,6 @@
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
     roughness_type = smooth
-    # manual_friction_factor = 0
     gravity = '9.8 0 0'
     outputs = exodus
     output_properties = 'drift_velocity well_velocity void_fraction density temperature gas_velocity liquid_velocity '
@@ -142,7 +141,5 @@
 
 
 [Outputs]
-  # execute_on = 'INITIAL NONLINEAR TIMESTEP_END '
-  print_linear_residuals = false
   exodus = true
 []

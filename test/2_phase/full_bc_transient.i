@@ -46,7 +46,7 @@
     roughness_type = smooth
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'well_velocity dkappa_dp dkappa_dh dkappa_dm dkappa_dp2 dkappa_dh2 dkappa_dm2 dkappa_dph dkappa_dpm dkappa_dhm void_fraction density temperature'
+    output_properties = 'well_velocity void_fraction density temperature'
   [../]
 []
 
@@ -61,25 +61,19 @@
     type = FunctionDirichletBC
     variable = m
     boundary = right
-    # function = 'if(t<15, 0.06*t, 0.9)'
-    function = 1e-5
+    function = 'if(t<15, 0.06*t, 0.9)'
   [../]
   [./hbc]
     type = FunctionDirichletBC
     variable = h
     boundary = right
-    # function = 'if(t<100, 1e5, if(t>200, 6e5, 1e5+5e3*(t-100)))'
-    function = 5.5e5
+    function = 'if(t<20, 1e5, if(t>40, 5.5e5, 1e5+2.25e4*(t-20)))'
   [../]
 []
 
 [Variables]
   [./p]
-    [./InitialCondition]
-      type = FunctionIC
-      function = '1e5+x*0.9e4'
-    [../]
-    # initial_condition = 1e5
+    initial_condition = 1e5
   [../]
   [./m]
     initial_condition = 1e-5
@@ -94,35 +88,18 @@
     type = MoskitoMass_2p1c
     variable = m
   [../]
-  # [./mtkernel]
-  #   type = MoskitoTimeMass_2p1c
-  #   variable = m
-  #   pressure = p
-  #   enthalpy = h
-  # [../]
   [./pkernel]
     type = MoskitoMomentum_2p1c
     variable = p
     massrate = m
     enthalpy = h
   [../]
-  # [./ptkernel]
-  #   type = MoskitoTimeMomentum_2p1c
-  #   variable = p
-  #   massrate = m
-  # [../]
   [./hkernel]
     type = MoskitoEnergy_2p1c
     variable = h
     massrate = m
     pressure = p
   [../]
-  # [./htkernel]
-  #   type = MoskitoTimeEnergy_2p1c
-  #   variable = h
-  #   massrate = m
-  #   pressure = p
-  # [../]
 []
 
 [Preconditioning]
@@ -154,15 +131,14 @@
     variable = h
     min_value = 1e4
     max_value = 2e6
-    # min_damping = 1e-10
+    min_damping = 1e-10
   [../]
 []
 
 [Executioner]
   type = Transient
-  dt = 50
-  dtmax = 20
-  end_time = 10000
+  dt = 5
+  end_time = 50
   l_max_its = 50
   nl_max_its = 100
   l_tol = 1e-8
@@ -171,11 +147,6 @@
   solve_type = NEWTON
   automatic_scaling = true
   compute_scaling_once = false
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 5
-    growth_factor = 2
-  [../]
   [./Quadrature]
     type = GAUSS
     element_order = FIRST
