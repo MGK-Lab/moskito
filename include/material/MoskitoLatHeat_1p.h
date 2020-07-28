@@ -144,7 +144,6 @@ protected:
   // hydraulic_diameter
   const MaterialProperty<Real> & _lambda;
   const bool & _add_hf;
-  Real _hfac;
   // Stefan Bolzmann Konstante in SI units (W/(m² * K⁴))
   Real Boltz = 0.00000005670367;
   Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
