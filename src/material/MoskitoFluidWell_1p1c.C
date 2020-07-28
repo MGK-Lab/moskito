@@ -45,6 +45,7 @@ MoskitoFluidWell_1p1c::MoskitoFluidWell_1p1c(const InputParameters & parameters)
     eos_uo(getUserObject<MoskitoEOS1P>("eos_uo")),
     viscosity_uo(getUserObject<MoskitoViscosity1P>("viscosity_uo")),
     _vis(declareProperty<Real>("viscosity")),
+    _lambda(declareProperty<Real>("thermal_conductivity")),
     _cp(declareProperty<Real>("specific_heat")),
     _rho(declareProperty<Real>("density")),
     _drho_dp(declareProperty<Real>("drho_dp")),
@@ -61,6 +62,7 @@ MoskitoFluidWell_1p1c::computeQpProperties()
   MoskitoFluidWellGeneral::computeQpProperties();
 
   _vis[_qp] = viscosity_uo.mu(_P[_qp], _T[_qp]);
+  _lambda[_qp] = eos_uo.lambda(_P[_qp], _T[_qp]);
   _cp[_qp] = eos_uo.cp(_P[_qp], _T[_qp]);
   _h[_qp] = eos_uo.h_from_p_T(_P[_qp], _T[_qp]);
   eos_uo.rho_from_p_T(_P[_qp], _T[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp]);

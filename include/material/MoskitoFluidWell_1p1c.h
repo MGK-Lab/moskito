@@ -46,6 +46,8 @@ protected:
 
   // The vescosity
   MaterialProperty<Real> & _vis;
+  // The constant thermal conductivity of brine
+  MaterialProperty<Real> & _lambda;
   // The specific heat at constant pressure
   MaterialProperty<Real> & _cp;
   // The density
