@@ -57,6 +57,8 @@ protected:
   MaterialProperty<Real> & _lambda;
   // Direction of flow, the positive sign is production and vice versa
   MaterialProperty<Real> & _well_sign;
+  // Hudraulic diameter
+  MaterialProperty<Real> & _H_dia;
 
   // The coupled pressure
   const VariableValue & _P;
