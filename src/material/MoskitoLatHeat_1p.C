@@ -36,6 +36,8 @@ validParams<MoskitoLatHeat_1p>()
     params.addClassDescription("Materials for the Lateral heat transfer between "
           "wellbore and formation");
     params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
+    params.addParam<Real>("brine_thermal_conductivity", 0.6,
+                "Thermal diffusivity of brine (W/(m*K))");
     params.addParam<Real>("emissivity_annulus_outer", 0.9,
           "Emissivity of inside casing surface ()");
     params.addParam<Real>("emissivity_annulus_inner", 0.9,
@@ -80,6 +82,8 @@ validParams<MoskitoLatHeat_1p>()
     params.addParam<MooseEnum>("DimTime_calculation_model", dt_model,
                 "Define calculation type of dimensionless time: "
                 "Ramey1962, Kutun2015");
+    params.addParam<bool>("hf_existence", true, "Consider potential energy "
+                "caused by gravity acceleration");
     return params;
 }
 
@@ -89,6 +93,7 @@ MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
     _T(coupledValue("temperature")),
     _RadTubout(declareProperty<Real>("radius_tubbing_outer")),
     _TRock(declareProperty<Real>("formation_temperature")),
+    _brine_conductivity(getParam<Real>("brine_thermal_conductivity")),
     _Annulus_eao(getParam<Real>("emissivity_annulus_outer")),
     _Annulus_eai(getParam<Real>("emissivity_annulus_inner")),
     _Annulus_rho(getParam<Real>("density_annulus")),
@@ -110,9 +115,19 @@ MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
     _tol(getParam<Real>("derivative_tolerance")),
     _independ_gravity(getParam<RealVectorValue>("Ind_grav")),
     _well_assembly(getParam<std::vector<Real>>("well_diameter_vector")),
-    _well_dir(getMaterialProperty<RealVectorValue>("well_direction_vector"))
+    _well_dir(getMaterialProperty<RealVectorValue>("well_direction_vector")),
+    _Re(getMaterialProperty<Real>("well_reynolds_no")),
+    _vis(getMaterialProperty<Real>("viscosity")),
+    _cp(getMaterialProperty<Real>("specific_heat")),
+    _H_dia(getMaterialProperty<Real>("hydraulic_diameter")),
+    _add_hf(getParam<bool>("hf_existence"))
 {
 Timing = (parameters.isParamSetByUser("user_defined_time")) ? getParam<Real>("user_defined_time") : _t;
+
+if(_add_hf)
+  _hfac = 1.0;
+else
+  _hfac = 0.0;
 }
 
 // Compute dimensionless time (ft)
@@ -376,6 +391,16 @@ MoskitoLatHeat_1p::computeReferenceResidual(const Real trail_value, const Real s
 }
 
 Real
+MoskitoLatHeat_1p::Conv_coeff()
+{
+  Real pr_b = _vis[_qp] * _cp[_qp] / _brine_conductivity;
+  Real nusselt = 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
+  Real Conv_coeff = nusselt * _brine_conductivity / _H_dia[_qp];
+
+  return Conv_coeff;
+}
+
+Real
 MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
 {
   // Auxillary variable
@@ -401,6 +426,8 @@ MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
     hc = ConvectiveHeatTransferCoefficient(scalar, _T[_qp], grav);
     Aux += 1.0 / (_rai * (hc + hr));
   }
+
+  Aux += 1.0 / (_well_assembly[0] * 0.5 * Conv_coeff()) * _hfac;
 
   Uto = 1.0 / (Aux * (_well_assembly[1] / 2.0));
 
