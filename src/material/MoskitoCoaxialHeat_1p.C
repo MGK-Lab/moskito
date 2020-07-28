@@ -46,10 +46,8 @@ validParams<MoskitoCoaxialHeat_1p>()
 
 MoskitoCoaxialHeat_1p::MoskitoCoaxialHeat_1p(const InputParameters & parameters)
   : Material(parameters),
-
     _rdo(declareProperty<Real>("drilling_pipe_outer_radius")),
     _rdi(declareProperty<Real>("drilling_pipe_inner_radius")),
     _kd(declareProperty<Real>("conductivity_drilling_pipe"))
-
 {
 }

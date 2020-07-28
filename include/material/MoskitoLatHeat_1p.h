@@ -139,8 +139,10 @@ protected:
   const MaterialProperty<Real> & _vis;
   // soecific heat capacity of working fluid
   const MaterialProperty<Real> & _cp;
-  // hydraulic_diameter
+  // thermal conductivity
   const MaterialProperty<Real> & _H_dia;
+  // hydraulic_diameter
+  const MaterialProperty<Real> & _lambda;
   const bool & _add_hf;
   Real _hfac;
   // Stefan Bolzmann Konstante in SI units (W/(m² * K⁴))

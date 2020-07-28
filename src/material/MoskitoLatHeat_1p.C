@@ -36,8 +36,6 @@ validParams<MoskitoLatHeat_1p>()
     params.addClassDescription("Materials for the Lateral heat transfer between "
           "wellbore and formation");
     params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
-    params.addParam<Real>("brine_thermal_conductivity", 0.6,
-                "Thermal diffusivity of brine (W/(m*K))");
     params.addParam<Real>("emissivity_annulus_outer", 0.9,
           "Emissivity of inside casing surface ()");
     params.addParam<Real>("emissivity_annulus_inner", 0.9,
@@ -93,7 +91,6 @@ MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
     _T(coupledValue("temperature")),
     _RadTubout(declareProperty<Real>("radius_tubbing_outer")),
     _TRock(declareProperty<Real>("formation_temperature")),
-    _brine_conductivity(getParam<Real>("brine_thermal_conductivity")),
     _Annulus_eao(getParam<Real>("emissivity_annulus_outer")),
     _Annulus_eai(getParam<Real>("emissivity_annulus_inner")),
     _Annulus_rho(getParam<Real>("density_annulus")),
@@ -120,6 +117,7 @@ MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
     _vis(getMaterialProperty<Real>("viscosity")),
     _cp(getMaterialProperty<Real>("specific_heat")),
     _H_dia(getMaterialProperty<Real>("hydraulic_diameter")),
+    _lambda(getMaterialProperty<Real>("thermal_conductivity")),
     _add_hf(getParam<bool>("hf_existence"))
 {
 Timing = (parameters.isParamSetByUser("user_defined_time")) ? getParam<Real>("user_defined_time") : _t;
@@ -393,9 +391,9 @@ MoskitoLatHeat_1p::computeReferenceResidual(const Real trail_value, const Real s
 Real
 MoskitoLatHeat_1p::Conv_coeff()
 {
-  Real pr_b = _vis[_qp] * _cp[_qp] / _brine_conductivity;
+  Real pr_b = _vis[_qp] * _cp[_qp] / _lambda[_qp];
   Real nusselt = 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
-  Real Conv_coeff = nusselt * _brine_conductivity / _H_dia[_qp];
+  Real Conv_coeff = nusselt * _lambda[_qp] / _H_dia[_qp];
 
   return Conv_coeff;
 }
