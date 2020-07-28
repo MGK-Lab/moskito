@@ -44,6 +44,7 @@ MoskitoFluidWell_1p1c::MoskitoFluidWell_1p1c(const InputParameters & parameters)
   : MoskitoFluidWellGeneral(parameters),
     eos_uo(getUserObject<MoskitoEOS1P>("eos_uo")),
     viscosity_uo(getUserObject<MoskitoViscosity1P>("viscosity_uo")),
+    _vis(declareProperty<Real>("viscosity")),
     _cp(declareProperty<Real>("specific_heat")),
     _rho(declareProperty<Real>("density")),
     _drho_dp(declareProperty<Real>("drho_dp")),
@@ -59,12 +60,13 @@ MoskitoFluidWell_1p1c::computeQpProperties()
 {
   MoskitoFluidWellGeneral::computeQpProperties();
 
+  _vis[_qp] = viscosity_uo.mu(_P[_qp], _T[_qp]);
   _cp[_qp] = eos_uo.cp(_P[_qp], _T[_qp]);
   _h[_qp] = eos_uo.h_from_p_T(_P[_qp], _T[_qp]);
   eos_uo.rho_from_p_T(_P[_qp], _T[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp]);
 
   _u[_qp] = _flow[_qp] / _area[_qp];
-  _Re[_qp] = _rho[_qp] * _dia[_qp] * fabs(_u[_qp]) / viscosity_uo.mu(_P[_qp], _T[_qp]);
+  _Re[_qp] = _rho[_qp] * _dia[_qp] * fabs(_u[_qp]) / _vis[_qp];
   if (_f_defined)
     _friction[_qp] = _u_f;
   else
