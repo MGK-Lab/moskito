@@ -143,6 +143,8 @@ protected:
   const MaterialProperty<Real> & _H_dia;
   // hydraulic_diameter
   const MaterialProperty<Real> & _lambda;
+  // The convective heat transfer factor
+  const MaterialProperty<Real> & _hf;
   const bool & _add_hf;
   // Stefan Bolzmann Konstante in SI units (W/(m² * K⁴))
   Real Boltz = 0.00000005670367;

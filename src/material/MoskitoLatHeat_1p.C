@@ -118,6 +118,7 @@ MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
     _cp(getMaterialProperty<Real>("specific_heat")),
     _H_dia(getMaterialProperty<Real>("hydraulic_diameter")),
     _lambda(getMaterialProperty<Real>("thermal_conductivity")),
+    _hf(getMaterialProperty<Real>("convective_heat_factor")),
     _add_hf(getParam<bool>("convective_thermal_resistance"))
 {
 Timing = (parameters.isParamSetByUser("user_defined_time")) ? getParam<Real>("user_defined_time") : _t;
@@ -384,31 +385,6 @@ MoskitoLatHeat_1p::computeReferenceResidual(const Real trail_value, const Real s
 }
 
 Real
-MoskitoLatHeat_1p::Conv_coeff()
-{
-  Real pr_b, nusselt, gama, Conv_coeff;
-  if (_add_hf && _Re[_qp]>0.0)
-  {
-     pr_b = _vis[_qp] * _cp[_qp] / _lambda[_qp];
-     if (_Re[_qp]<2300.0)
-     {
-         nusselt = 4.364 ;
-     }
-     if (2300.0<_Re[_qp]<10000.0)
-     {
-         gama = (_Re[_qp] - 2300.0)/(10000.0 - 2300.0);
-         nusselt = (1.0 - gama) * 4.364 + gama * 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
-     }
-     if (10000.0<_Re[_qp])
-     {
-         nusselt = 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
-     }
-  }
-
-  return nusselt * _lambda[_qp] / _H_dia[_qp];
-}
-
-Real
 MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
 {
   // Auxillary variable
@@ -437,7 +413,7 @@ MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
 
   if (_add_hf && _Re[_qp]>0.0)
   {
-  Aux += 1.0 / (_well_assembly[0] * 0.5 * Conv_coeff());
+  Aux += 1.0 / (_well_assembly[0] * 0.5 * _hf[_qp]);
   }
 
   Uto = 1.0 / (Aux * (_well_assembly[1] / 2.0));
