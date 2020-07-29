@@ -141,7 +141,7 @@ protected:
   const MaterialProperty<Real> & _cp;
   // thermal conductivity
   const MaterialProperty<Real> & _H_dia;
-  // hydraulic_diameter
+  // The constant thermal conductivity of fluid
   const MaterialProperty<Real> & _lambda;
   // The convective heat transfer factor
   const MaterialProperty<Real> & _hf;

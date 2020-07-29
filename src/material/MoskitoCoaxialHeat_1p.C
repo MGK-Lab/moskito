@@ -32,15 +32,15 @@ validParams<MoskitoCoaxialHeat_1p>()
     InputParameters params = validParams<Material>();
 
     params.addClassDescription("Materials for the Lateral heat transfer between "
-          "wellbore and drilling pipe");
+          "inner and outer pipes");
     params.addRequiredCoupledVar("hi", "convective heat transfer coefficient of inner fluid");
     params.addRequiredCoupledVar("ho", "convective heat transfer coefficient of outer fluid");
-    params.addParam<Real>("drilling_pipe_outer_radius", 0.06985,
-          "outer radius of the drilling pipe (m)");
-    params.addParam<Real>("drilling_pipe_inner_radius", 0.04445,
-          "outer radius of the drilling pipe (m)");
-    params.addParam<Real>("conductivity_drilling_pipe", 80.0 ,
-          "Thermal conductivity of the drilling pipe (W/(m*K))");
+    params.addRequiredParam<Real>("pipe_outer_radius", 0.06985,
+          "outer radius of the inner pipe (m)");
+    params.addRequiredParam<Real>("pipe_inner_radius", 0.04445,
+          "inner radius of the inner pipe (m)");
+    params.addRequiredParam<Real>("conductivity_inner_pipe", 80.0 ,
+          "Thermal conductivity of the inner pipe (W/(m*K))");
 
     return params;
 }
@@ -49,9 +49,9 @@ MoskitoCoaxialHeat_1p::MoskitoCoaxialHeat_1p(const InputParameters & parameters)
   : Material(parameters),
     _hi(coupledValue("hi")),
     _ho(coupledValue("ho")),
-    _rdo(declareProperty<Real>("drilling_pipe_outer_radius")),
-    _rdi(declareProperty<Real>("drilling_pipe_inner_radius")),
-    _kd(declareProperty<Real>("conductivity_drilling_pipe")),
+    _rdo(declareProperty<Real>("inner_pipe_outer_radius")),
+    _rdi(declareProperty<Real>("inner_pipe_inner_radius")),
+    _kd(declareProperty<Real>("conductivity_inner_pipe")),
     _ohc(declareProperty<Real>("overall_heat_transfer_coeff"))
 {
 }
@@ -59,5 +59,9 @@ MoskitoCoaxialHeat_1p::MoskitoCoaxialHeat_1p(const InputParameters & parameters)
 void
 MoskitoCoaxialHeat_1p::computeQpProperties()
 {
-  _ohc[_qp] = 1.0 / (1.0/_rdo[_qp]/_ho[_qp] + log(_rdo[_qp]/_rdi[_qp])/_kd[_qp] + 1.0/_rdi[_qp]/_hi[_qp]);
+  Real j = 0.0 ;
+  j += 1.0/_rdo[_qp]/_ho[_qp] ;
+  j += log(_rdo[_qp]/_rdi[_qp])/_kd[_qp] ;
+  j += 1.0/_rdi[_qp]/_hi[_qp] ;
+  _ohc[_qp] = 1.0 / j ;
 }

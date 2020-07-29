@@ -117,7 +117,7 @@ MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
     _vis(getMaterialProperty<Real>("viscosity")),
     _cp(getMaterialProperty<Real>("specific_heat")),
     _H_dia(getMaterialProperty<Real>("hydraulic_diameter")),
-    _lambda(getMaterialProperty<Real>("thermal_conductivity")),
+    _lambda(getMaterialProperty<Real>("fluid_thermal_conductivity")),
     _hf(getMaterialProperty<Real>("convective_heat_factor")),
     _add_hf(getParam<bool>("convective_thermal_resistance"))
 {

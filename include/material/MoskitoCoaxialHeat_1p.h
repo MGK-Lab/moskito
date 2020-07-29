@@ -41,11 +41,11 @@ protected:
   const VariableValue & _hi;
   // The coupled auxiliary variable ho
   const VariableValue & _ho;
-  // outer radius of drilling pipe
+  // outer radius of inner pipe
   MaterialProperty<Real> & _rdo;
-  // inner radius of drilling pipe
+  // inner radius of inner pipe
   MaterialProperty<Real> & _rdi;
-  // thermal conductivity of drilling pipe
+  // thermal conductivity of inner pipe
   MaterialProperty<Real> & _kd;
   // overall heat transfer coeff
   MaterialProperty<Real> & _ohc;

@@ -46,7 +46,7 @@ MoskitoFluidWell_1p1c::MoskitoFluidWell_1p1c(const InputParameters & parameters)
     viscosity_uo(getUserObject<MoskitoViscosity1P>("viscosity_uo")),
     _hf(declareProperty<Real>("convective_heat_factor")),
     _vis(declareProperty<Real>("viscosity")),
-    _lambda(declareProperty<Real>("thermal_conductivity")),
+    _lambda(declareProperty<Real>("fluid_thermal_conductivity")),
     _cp(declareProperty<Real>("specific_heat")),
     _rho(declareProperty<Real>("density")),
     _drho_dp(declareProperty<Real>("drho_dp")),
@@ -62,7 +62,6 @@ MoskitoFluidWell_1p1c::computeQpProperties()
 {
   MoskitoFluidWellGeneral::computeQpProperties();
 
-  _hf[_qp] = Conv_coeff();
   _vis[_qp] = viscosity_uo.mu(_P[_qp], _T[_qp]);
   _lambda[_qp] = eos_uo.lambda(_P[_qp], _T[_qp]);
   _cp[_qp] = eos_uo.cp(_P[_qp], _T[_qp]);
@@ -76,8 +75,9 @@ MoskitoFluidWell_1p1c::computeQpProperties()
   else
     MoodyFrictionFactor(_friction[_qp], _rel_roughness, _Re[_qp], _roughness_type);
 
-  _lambda[_qp]  = (1.0 - (_d * _d) / std::pow(_d + _thickness , 2.0)) * _lambda0;
-  _lambda[_qp] += (_d * _d) / std::pow(_d + _thickness , 2.0) * eos_uo.lambda(_P[_qp], _T[_qp]);
+  _hf[_qp] = Conv_coeff();
+  // _lambda[_qp]  = (1.0 - (_d * _d) / std::pow(_d + _thickness , 2.0)) * _lambda0;
+  // _lambda[_qp] += (_d * _d) / std::pow(_d + _thickness , 2.0) * eos_uo.lambda(_P[_qp], _T[_qp]);
 }
 
 Real

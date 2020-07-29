@@ -43,11 +43,11 @@ protected:
   const MoskitoEOS1P & eos_uo;
   // Userobject to Viscosity Eq
   const MoskitoViscosity1P & viscosity_uo;
-  // The convective heat transfer factor
+  // The convective heat transfer factor of fluid in coaxial configuration
   MaterialProperty<Real> & _hf;
   // The vescosity
   MaterialProperty<Real> & _vis;
-  // The constant thermal conductivity of brine
+  // The constant thermal conductivity of fluid
   MaterialProperty<Real> & _lambda;
   // The specific heat at constant pressure
   MaterialProperty<Real> & _cp;
