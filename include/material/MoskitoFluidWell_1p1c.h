@@ -43,7 +43,8 @@ protected:
   const MoskitoEOS1P & eos_uo;
   // Userobject to Viscosity Eq
   const MoskitoViscosity1P & viscosity_uo;
-
+  // The convective heat transfer factor
+  MaterialProperty<Real> & _hf;
   // The vescosity
   MaterialProperty<Real> & _vis;
   // The constant thermal conductivity of brine
@@ -63,4 +64,7 @@ protected:
   const VariableValue & _T;
   // The coupled flow rate
   const VariableValue & _flow;
+
+  // function for calculating convective heat transfer coeff
+  Real Conv_coeff();
 };
