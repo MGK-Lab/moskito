@@ -80,8 +80,8 @@ validParams<MoskitoLatHeat_1p>()
     params.addParam<MooseEnum>("DimTime_calculation_model", dt_model,
                 "Define calculation type of dimensionless time: "
                 "Ramey1962, Kutun2015");
-    params.addParam<bool>("convective_thermal_resistance", true, "Consider potential energy "
-                "caused by gravity acceleration");
+    params.addParam<bool>("convective_thermal_resistance", true, "Consider thermal resistance "
+                "caused by convective term");
     return params;
 }
 
@@ -386,15 +386,26 @@ MoskitoLatHeat_1p::computeReferenceResidual(const Real trail_value, const Real s
 Real
 MoskitoLatHeat_1p::Conv_coeff()
 {
-  Real pr_b, nusselt, Conv_coeff;
-  if (_add_hf)
-     {
+  Real pr_b, nusselt, gama, Conv_coeff;
+  if (_add_hf && _Re[_qp]>0.0)
+  {
      pr_b = _vis[_qp] * _cp[_qp] / _lambda[_qp];
-     nusselt = 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
-     Conv_coeff = nusselt * _lambda[_qp] / _H_dia[_qp];
+     if (_Re[_qp]<2300.0)
+     {
+         nusselt = 4.364 ;
      }
+     if (2300.0<_Re[_qp]<10000.0)
+     {
+         gama = (_Re[_qp] - 2300.0)/(10000.0 - 2300.0);
+         nusselt = (1.0 - gama) * 4.364 + gama * 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
+     }
+     if (10000.0<_Re[_qp])
+     {
+         nusselt = 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
+     }
+  }
 
-  return Conv_coeff;
+  return nusselt * _lambda[_qp] / _H_dia[_qp];
 }
 
 Real
@@ -424,7 +435,7 @@ MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
     Aux += 1.0 / (_rai * (hc + hr));
   }
 
-  if (_add_hf)
+  if (_add_hf && _Re[_qp]>0.0)
   {
   Aux += 1.0 / (_well_assembly[0] * 0.5 * Conv_coeff());
   }
