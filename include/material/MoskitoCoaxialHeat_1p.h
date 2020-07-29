@@ -34,14 +34,20 @@ class MoskitoCoaxialHeat_1p : public Material
 {
 public:
   MoskitoCoaxialHeat_1p(const InputParameters & parameters);
+  virtual void computeQpProperties() override;
 
 protected:
-
+  // The coupled auxiliary variable hi
+  const VariableValue & _hi;
+  // The coupled auxiliary variable ho
+  const VariableValue & _ho;
   // outer radius of drilling pipe
   MaterialProperty<Real> & _rdo;
   // inner radius of drilling pipe
   MaterialProperty<Real> & _rdi;
   // thermal conductivity of drilling pipe
   MaterialProperty<Real> & _kd;
+  // overall heat transfer coeff
+  MaterialProperty<Real> & _ohc;
 
 };

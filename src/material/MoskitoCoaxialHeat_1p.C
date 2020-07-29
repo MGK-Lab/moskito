@@ -33,7 +33,8 @@ validParams<MoskitoCoaxialHeat_1p>()
 
     params.addClassDescription("Materials for the Lateral heat transfer between "
           "wellbore and drilling pipe");
-
+    params.addRequiredCoupledVar("hi", "convective heat transfer coefficient of inner fluid");
+    params.addRequiredCoupledVar("ho", "convective heat transfer coefficient of outer fluid");
     params.addParam<Real>("drilling_pipe_outer_radius", 0.06985,
           "outer radius of the drilling pipe (m)");
     params.addParam<Real>("drilling_pipe_inner_radius", 0.04445,
@@ -46,8 +47,17 @@ validParams<MoskitoCoaxialHeat_1p>()
 
 MoskitoCoaxialHeat_1p::MoskitoCoaxialHeat_1p(const InputParameters & parameters)
   : Material(parameters),
+    _hi(coupledValue("hi")),
+    _ho(coupledValue("ho")),
     _rdo(declareProperty<Real>("drilling_pipe_outer_radius")),
     _rdi(declareProperty<Real>("drilling_pipe_inner_radius")),
-    _kd(declareProperty<Real>("conductivity_drilling_pipe"))
+    _kd(declareProperty<Real>("conductivity_drilling_pipe")),
+    _ohc(declareProperty<Real>("overall_heat_transfer_coeff"))
 {
+}
+
+void
+MoskitoCoaxialHeat_1p::computeQpProperties()
+{
+  _ohc[_qp] = 1.0 / (1.0/_rdo[_qp]/_ho[_qp] + log(_rdo[_qp]/_rdi[_qp])/_kd[_qp] + 1.0/_rdi[_qp]/_hi[_qp]);
 }
