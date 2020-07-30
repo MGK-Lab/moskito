@@ -35,11 +35,11 @@ validParams<MoskitoCoaxialHeat_1p>()
           "inner and outer pipes");
     params.addRequiredCoupledVar("hi", "convective heat transfer coefficient of inner fluid");
     params.addRequiredCoupledVar("ho", "convective heat transfer coefficient of outer fluid");
-    params.addRequiredParam<Real>("pipe_outer_radius", 0.06985,
+    params.addRequiredParam<Real>("inner_pipe_outer_radius",
           "outer radius of the inner pipe (m)");
-    params.addRequiredParam<Real>("pipe_inner_radius", 0.04445,
+    params.addRequiredParam<Real>("inner_pipe_inner_radius",
           "inner radius of the inner pipe (m)");
-    params.addRequiredParam<Real>("conductivity_inner_pipe", 80.0 ,
+    params.addRequiredParam<Real>("conductivity_inner_pipe",
           "Thermal conductivity of the inner pipe (W/(m*K))");
 
     return params;
@@ -52,13 +52,19 @@ MoskitoCoaxialHeat_1p::MoskitoCoaxialHeat_1p(const InputParameters & parameters)
     _rdo(declareProperty<Real>("inner_pipe_outer_radius")),
     _rdi(declareProperty<Real>("inner_pipe_inner_radius")),
     _kd(declareProperty<Real>("conductivity_inner_pipe")),
-    _ohc(declareProperty<Real>("overall_heat_transfer_coeff"))
+    _ohc(declareProperty<Real>("overall_heat_transfer_coeff")),
+    _rdoo(getParam<Real>("inner_pipe_outer_radius")),
+    _rdii(getParam<Real>("inner_pipe_inner_radius")),
+    _kdd(getParam<Real>("conductivity_inner_pipe"))
 {
 }
 
 void
 MoskitoCoaxialHeat_1p::computeQpProperties()
 {
+  _rdo[_qp] = _rdoo;
+  _rdi[_qp] = _rdii;
+  _kd[_qp] = _kdd;
   Real j = 0.0 ;
   j += 1.0/_rdo[_qp]/_ho[_qp] ;
   j += log(_rdo[_qp]/_rdi[_qp])/_kd[_qp] ;

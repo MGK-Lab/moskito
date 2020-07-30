@@ -49,5 +49,7 @@ protected:
   MaterialProperty<Real> & _kd;
   // overall heat transfer coeff
   MaterialProperty<Real> & _ohc;
-
+  Real _rdoo;
+  Real _rdii;
+  Real _kdd;
 };
