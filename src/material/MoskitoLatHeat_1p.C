@@ -80,7 +80,7 @@ validParams<MoskitoLatHeat_1p>()
     params.addParam<MooseEnum>("DimTime_calculation_model", dt_model,
                 "Define calculation type of dimensionless time: "
                 "Ramey1962, Kutun2015");
-    params.addParam<bool>("convective_thermal_resistance", true, "Consider thermal resistance "
+    params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal resistance "
                 "caused by convective term");
     return params;
 }
