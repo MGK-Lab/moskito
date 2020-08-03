@@ -29,4 +29,9 @@
     input = 'Satman.i'
     exodiff = 'Satman_out.e'
   [../]
+  [./Coaxial_Check]
+    type = 'Exodiff'
+    input = 'coaxial.i'
+    exodiff = 'coaxial_out.e'
+  [../]
 []

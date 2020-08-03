@@ -271,7 +271,7 @@
 [Executioner]
   type = Transient
   dt = 100
-  end_time = 18000
+  end_time = 100
   l_tol = 1e-8
   l_max_its = 50
   nl_rel_tol = 1e-8

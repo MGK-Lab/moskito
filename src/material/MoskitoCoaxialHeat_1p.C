@@ -94,28 +94,28 @@ MoskitoCoaxialHeat_1p::Conv_coeff_inner()
   u_i = _flow_i[_qp] / area_i;
   rho_i = eos_uo.rho_from_p_T(_p_i[_qp], _T_i[_qp]);
   vis_i = viscosity_uo.mu(_p_i[_qp], _T_i[_qp]);
-  cp_i = eos_uo.cp(_p_i[_qp], _T_i[_qp]);
-  lambda_i = eos_uo.lambda(_p_i[_qp], _T_i[_qp]);
   Re_i = rho_i * 2.0 * (_rio - _wt) * fabs(u_i) / vis_i;
 
   if (Re_i>0.0)
   {
+     cp_i = eos_uo.cp(_p_i[_qp], _T_i[_qp]);
+     lambda_i = eos_uo.lambda(_p_i[_qp], _T_i[_qp]);
      pr_i = vis_i * cp_i / lambda_i;
      if (Re_i<2300.0)
      {
          _nusselt_i[_qp]  = 4.364 ;
      }
-     if (2300.0<Re_i<10000.0)
+     if (Re_i>2300.0 && Re_i<10000.0)
      {
          gama_i = (Re_i - 2300.0)/(10000.0 - 2300.0);
          _nusselt_i[_qp] = (1.0 - gama_i) * 4.364 + gama_i * 0.023 * pow(Re_i, 0.8) * pow(pr_i, 0.3);
+         std::cout<<Re_i<< "   " << _nusselt_i[_qp] <<std::endl;
      }
-     if (10000.0<Re_i)
+     if (Re_i>10000.0)
      {
          _nusselt_i[_qp] = 0.023 * pow(Re_i, 0.8) * pow(pr_i, 0.3);
      }
   }
-  std::cout<<Re_i<< "   " << _nusselt_i[_qp] <<std::endl;
   return _nusselt_i[_qp] * lambda_i / 2.0 / (_rio - _wt);
 }
 
