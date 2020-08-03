@@ -45,29 +45,29 @@ protected:
   const MoskitoViscosity1P & viscosity_uo;
   // overall heat transfer coeff
   MaterialProperty<Real> & _ohc;
-  Real _rdo;
-  Real _rdi;
-  Real _rwo;
-  Real _kd;
+  Real _rio;
+  Real _wt;
+  Real _roi;
+  Real _ki;
   // The coupled temperature of inner pipe
   const VariableValue & _T_i;
   // The coupled flow rate of inner pipe
   const VariableValue & _flow_i;
   // The coupled pressure of inner pipe
   const VariableValue & _p_i;
-  // The coupled temperature of inner pipe
-  const VariableValue & _T_a;
-  // The coupled flow rate of inner pipe
-  const VariableValue & _flow_a;
-  // The coupled pressure of inner pipe
-  const VariableValue & _p_a;
+  // The coupled temperature of outer pipe
+  const VariableValue & _T_o;
+  // The coupled flow rate of outer pipe
+  const VariableValue & _flow_o;
+  // The coupled pressure of outer pipe
+  const VariableValue & _p_o;
   // Nusslet number inner pipe
   MaterialProperty<Real> & _nusselt_i;
-  // Nusslet number annulus
-  MaterialProperty<Real> & _nusselt_a;
+  // Nusslet number outer pipe
+  MaterialProperty<Real> & _nusselt_o;
   // function for calculating convective heat transfer coeff in the inner pipe
   Real Conv_coeff_inner();
-  // function for calculating convective heat transfer coeff in the annulus
-  Real Conv_coeff_annulus();
+  // function for calculating convective heat transfer coeff in the outer pipe
+  Real Conv_coeff_outer();
   Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
