@@ -24,6 +24,8 @@
 #pragma once
 
 #include "Material.h"
+#include "MoskitoEOS1P.h"
+#include "MoskitoViscosity1P.h"
 
 class MoskitoCoaxialHeat_1p;
 
@@ -37,19 +39,35 @@ public:
   virtual void computeQpProperties() override;
 
 protected:
-  // The coupled auxiliary variable hi
-  const VariableValue & _hi;
-  // The coupled auxiliary variable ho
-  const VariableValue & _ho;
-  // outer radius of inner pipe
-  MaterialProperty<Real> & _rdo;
-  // inner radius of inner pipe
-  MaterialProperty<Real> & _rdi;
-  // thermal conductivity of inner pipe
-  MaterialProperty<Real> & _kd;
+  // Userobject to equation of state
+  const MoskitoEOS1P & eos_uo;
+  // Userobject to Viscosity Eq
+  const MoskitoViscosity1P & viscosity_uo;
   // overall heat transfer coeff
   MaterialProperty<Real> & _ohc;
-  Real _rdoo;
-  Real _rdii;
-  Real _kdd;
+  Real _rdo;
+  Real _rdi;
+  Real _rwo;
+  Real _kd;
+  // The coupled temperature of inner pipe
+  const VariableValue & _T_i;
+  // The coupled flow rate of inner pipe
+  const VariableValue & _flow_i;
+  // The coupled pressure of inner pipe
+  const VariableValue & _p_i;
+  // The coupled temperature of inner pipe
+  const VariableValue & _T_a;
+  // The coupled flow rate of inner pipe
+  const VariableValue & _flow_a;
+  // The coupled pressure of inner pipe
+  const VariableValue & _p_a;
+  // Nusslet number inner pipe
+  MaterialProperty<Real> & _nusselt_i;
+  // Nusslet number annulus
+  MaterialProperty<Real> & _nusselt_a;
+  // function for calculating convective heat transfer coeff in the inner pipe
+  Real Conv_coeff_inner();
+  // function for calculating convective heat transfer coeff in the annulus
+  Real Conv_coeff_annulus();
+  Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
