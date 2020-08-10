@@ -1,0 +1,88 @@
+/**************************************************************************/
+/*  MOSKITO - Multiphysics cOupled Simulator toolKIT for wellbOres        */
+/*                                                                        */
+/*  Copyright (C) 2017 by Maziar Gholami Korzani                          */
+/*  Karlsruhe Institute of Technology, Institute of Applied Geosciences   */
+/*  Division of Geothermal Research                                       */
+/*                                                                        */
+/*  This file is part of MOSKITO App                                      */
+/*  Co-developed by Sebastian Held                                        */
+/*                                                                        */
+/*  This program is free software: you can redistribute it and/or modify  */
+/*  it under the terms of the GNU General Public License as published by  */
+/*  the Free Software Foundation, either version 3 of the License, or     */
+/*  (at your option) any later version.                                   */
+/*                                                                        */
+/*  This program is distributed in the hope that it will be useful,       */
+/*  but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          */
+/*  GNU General Public License for more details.                          */
+/*                                                                        */
+/*  You should have received a copy of the GNU General Public License     */
+/*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
+/**************************************************************************/
+
+#pragma once
+
+#include "Material.h"
+#include "MoskitoSUPG.h"
+#include "NewtonIteration.h"
+
+class MoskitoLatHeat_Exc_Formation_1p;
+
+template <>
+InputParameters validParams<MoskitoLatHeat_Exc_Formation_1p>();
+
+class MoskitoLatHeat_Exc_Formation_1p : public Material, public NewtonIteration
+{
+public:
+  MoskitoLatHeat_Exc_Formation_1p(const InputParameters & parameters);
+  virtual void computeQpProperties() override;
+
+  virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
+  virtual Real computeResidual(const Real trail_value, const Real scalar) override;
+  virtual Real computeDerivative(const Real trail_value, const Real scalar) override;
+  virtual Real initialGuess(const Real trail_value) override;
+  virtual Real minimumPermissibleValue(const Real trail_value) const override
+  {
+    return 0.000000001;
+  }
+  virtual Real maximumPermissibleValue(const Real trail_value) const override
+  {
+    return 100000.0;
+  }
+
+protected:
+  // Fluid temperature at the center of the pipe
+  const VariableValue & _Tf;
+  // Formation temperature at the formation-casing interface
+  const VariableValue & _Tcf;
+
+  // tubing outer radius
+  MaterialProperty<Real> & _Rto;
+  // Well thermal resistivity
+  MaterialProperty<Real> & _Uto;
+
+  // Tolerance of finite difference derivation
+  const Real _tol;
+
+  // conductivities vector
+  std::vector<Real> _lambda_vec;
+  // outer diamters of well complition
+  std::vector<Real> _OD_vec;
+
+  // imported from other materials
+  const MaterialProperty<Real> & _Dti;
+  const MaterialProperty<RealVectorValue> & _gravity;
+  const MaterialProperty<RealVectorValue> & _well_dir;
+  const MaterialProperty<Real> & _Re;
+  const MaterialProperty<Real> & _hf;
+  const bool & _add_hf;
+
+  // Annulus outer and inner radiuses
+  Real _rai = 0.0, _rao = 0.0;
+  unsigned int _annulus_loc = 0;
+  bool _annulus_ind = false;
+
+  const MoskitoSUPG * _annulus_uo;
+};
