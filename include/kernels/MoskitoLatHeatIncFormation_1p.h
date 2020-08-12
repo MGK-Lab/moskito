@@ -40,13 +40,10 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  // Radius tubing outer
-  const MaterialProperty<Real> & _Rto;
   // Thermal wellbore resistivity
-  const MaterialProperty<Real> & _Uto;
-  // Temperature at formation - cement boundary
-  const MaterialProperty<Real> & _Twf;
-  // Diameter filled with liquid = _rti
+  const MaterialProperty<Real> & _lambda;
+  // formation Temperature
+  const MaterialProperty<Real> & _Tform;
   const MaterialProperty<Real> & _area;
   const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };

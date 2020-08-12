@@ -38,18 +38,17 @@ validParams<MoskitoLatHeatIncFormation_1p>()
 
 MoskitoLatHeatIncFormation_1p::MoskitoLatHeatIncFormation_1p(const InputParameters & parameters)
   : Kernel(parameters),
-  _Rto(getMaterialProperty<Real>("tubing_outer_radius")),
-  _Uto(getMaterialProperty<Real>("well_thermal_resistivity")),
-  _Twf(getMaterialProperty<Real>("wellbore_formation_temperature")),
+  _lambda(getMaterialProperty<Real>("total_thermal_resistivity")),
+  _Tform(getMaterialProperty<Real>("formation_temperature")),
   _area(getMaterialProperty<Real>("well_area"))
-  {
-  }
+{
+}
 
 Real
 MoskitoLatHeatIncFormation_1p::computeQpResidual()
 {
   Real r = 0.0;
-  r =  2.0 * PI * _Rto[_qp] * _Uto[_qp] * (_Twf[_qp] - _u[_qp] );
+  r =  2.0 * PI * _lambda[_qp] * (_Tform[_qp] - _u[_qp] );
   r /=  _area[_qp];
 
   return  -1.0 * r * _test[_i][_qp];
@@ -59,7 +58,7 @@ Real
 MoskitoLatHeatIncFormation_1p::computeQpJacobian()
 {
   Real j = 0.0;
-  j =  -2.0 * PI * _Rto[_qp] * _Uto[_qp] * _phi[_j][_qp];
+  j =  -2.0 * PI * _lambda[_qp] * _phi[_j][_qp];
   j /=  _area[_qp];
 
   return  -1.0 * j * _test[_i][_qp];

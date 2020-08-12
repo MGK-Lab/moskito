@@ -64,6 +64,8 @@ protected:
   MaterialProperty<Real> & _Rto;
   // Well thermal resistivity
   MaterialProperty<Real> & _Uto;
+  // total thermal resistivity
+  MaterialProperty<Real> & _lambda_t;
   // temperature at well-formation interface
   MaterialProperty<Real> & _Twf;
 
@@ -104,7 +106,7 @@ protected:
   Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 
   MooseEnum _time_func_user;
-  enum time_func_cases {Satman_eq15, Satman_eq16, Satman_eq17, Satman_eq18, Satman_eq19, Ramey_1981, Hasan_Kabir_2012};
+  enum time_func_cases {Satman_eq15, Satman_eq16, Satman_eq17, Satman_eq18, Satman_eq19, Ramey_1981, Hasan_Kabir_2012, OGS};
 
   // well-formation interface radius
   Real _Rwf;

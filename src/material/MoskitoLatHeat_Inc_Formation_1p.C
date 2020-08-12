@@ -48,7 +48,7 @@ validParams<MoskitoLatHeat_Inc_Formation_1p>()
     params.addParam<UserObjectName>("annulus_uo", "",
           "The name of the userobject for annulus");
     params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal resistance "
-          "caused by convective term");
+          "caused by convective term at the wall of the inner tubing");
     params.addRequiredParam<Real>("formation_heat_capacity",
           "Specific heat capacity of the formation (J/(kg*K))");
     params.addRequiredParam<Real>("formation_density",
@@ -60,9 +60,9 @@ validParams<MoskitoLatHeat_Inc_Formation_1p>()
     params.addParam<Real>("manual_time", 86400,
           "Time defined by the user for steady state simulations (s)");
     MooseEnum dt_model
-          ("Satman_eq15 Satman_eq16 Satman_eq17 Satman_eq18 Satman_eq19 Ramey_1981 Hasan_Kabir_2012", "Ramey_1981");
+          ("Satman_eq15 Satman_eq16 Satman_eq17 Satman_eq18 Satman_eq19 Ramey_1981 Hasan_Kabir_2012 OGS", "Ramey_1981");
     params.addParam<MooseEnum>("nondimensional_time_function", dt_model,
-                "Select a function from the list");
+          "Select a function from the list");
 
     return params;
 }
@@ -73,6 +73,7 @@ MoskitoLatHeat_Inc_Formation_1p::MoskitoLatHeat_Inc_Formation_1p(const InputPara
     _Tf(coupledValue("temperature_inner")),
     _Rto(declareProperty<Real>("tubing_outer_radius")),
     _Uto(declareProperty<Real>("well_thermal_resistivity")),
+    _lambda_t(declareProperty<Real>("total_thermal_resistivity")),
     _Twf(declareProperty<Real>("wellbore_formation_temperature")),
     _tol(getParam<Real>("derivative_tolerance")),
     _OD_vec(getParam<std::vector<Real>>("outer_diameters")),
@@ -159,6 +160,9 @@ MoskitoLatHeat_Inc_Formation_1p::computeQpProperties()
   }
 
   _Twf[_qp] = TemperatureWFinterface(_Uto[_qp]);
+
+  _lambda_t[_qp]  = _lambda_form  * _Rto[_qp] * _Uto[_qp];
+  _lambda_t[_qp] /= _Rto[_qp] * _Uto[_qp] * _ft + _lambda_form;
 }
 
 Real
@@ -207,6 +211,13 @@ MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
 
   case time_func_cases::Hasan_Kabir_2012:
     ft = std::log(std::exp(-0.2*t_fac) + (1.5 - 0.3719 * std::exp(-t_fac)) * std::sqrt(t_fac));
+  break;
+
+  case time_func_cases::OGS:
+    if(t_fac<=1.5)
+      ft = 1.1281 * std::sqrt(t_fac) * (1.0 - 0.3 * std::sqrt(t_fac));
+    else
+      ft = (0.4063 + 0.5 * std::log(t_fac)) * (1.0 + 0.6 / std::sqrt(t_fac));
   break;
   }
 

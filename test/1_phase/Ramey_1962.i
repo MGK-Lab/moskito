@@ -1,5 +1,4 @@
 
-# Validation of Heat exchange using the Paper from Satman & Tureyen 2016
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -8,32 +7,28 @@
   nx = 30
 []
 
-[Modules]
-  [./FluidProperties]
-    [./water_uo]
-      type = SimpleFluidProperties
-      density0 = 1000
-      cp = 4190
-      thermal_conductivity = 0.59
-    [../]
-  [../]
-[]
-
 [UserObjects]
   [./viscosity]
     type = MoskitoViscosityConst
     viscosity = 1.14e-3
   [../]
   [./eos]
-    type = MoskitoEOS1P_FPModule
-    SinglePhase_fp = water_uo
+    type = MoskitoEOS1P_IdealFluid
+    reference_density = 1000
+    specific_heat = 4190
+    thermal_conductivity = 0.59
+    thermal_expansion_0 = 0
+    thermal_expansion_1 = 0
+    bulk_modulus = 2e15
+    reference_temperature = 273.15
+    reference_enthalpy = 0
   [../]
 []
 
 [Functions]
   [./grad_func]
     type = ParsedFunction
-    value = '55'
+    value = '273.15+55'
   [../]
 []
 
@@ -48,14 +43,18 @@
     eos_uo = eos
     viscosity_uo = viscosity
     roughness_type = smooth
+    manual_friction_factor = 0.0079
     gravity = '0 0 0'
     well_type = injection
+    output_properties = 'well_moody_friction well_reynolds_no well_velocity convective_heat_factor'
+    outputs = exodus
   [../]
   [./Lateral]
     type = MoskitoLatHeat_Inc_Formation_1p
      temperature_inner = T
      outer_diameters = '0.25826 0.27 0.28'
      conductivities = '1.3 0.73'
+     convective_thermal_resistance = true
      # Rock parameters
      formation_density = 1800
      formation_thermal_conductivity = 2.78018
@@ -63,20 +62,20 @@
      # Configuration of material
      formation_temperature_function = grad_func
      nondimensional_time_function = Ramey_1981
-     output_properties = 'wellbore_formation_temperature well_thermal_resistivity'
+     output_properties = 'wellbore_formation_temperature total_thermal_resistivity'
      outputs = exodus
    [../]
 []
 
 [Variables]
   [./T]
-    initial_condition = 20
+    initial_condition = 293.15
   [../]
 []
 
 [AuxVariables]
   [./p]
-    initial_condition = 1.0e5
+    initial_condition = 101325
   [../]
   [./q]
     initial_condition = 2e-4
@@ -88,7 +87,7 @@
     type = DirichletBC
     variable = T
     boundary = left
-    value = 20
+    value = 293.15
   [../]
 [../]
 
@@ -124,7 +123,7 @@
 
 [Executioner]
   type = Transient
-  dt = 86400
+  dtmax = 3600
   end_time = 2592000
   l_max_its = 50
   l_tol = 1e-10
@@ -132,7 +131,11 @@
   nl_max_its = 50
   solve_type = NEWTON
   nl_abs_tol = 1e-7
-  []
+  [./TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 1
+    growth_factor = 1.01
+  [../]
 []
 
 [Outputs]
