@@ -30,8 +30,8 @@
     exodiff = 'Satman_out.e'
   [../]
   [./Coaxial_Check]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'coaxial.i'
-    exodiff = 'coaxial_out.e'
+    csvdiff = 'coaxial_out.csv'
   [../]
 []

@@ -1,6 +1,7 @@
 [Mesh]
   type = FileMesh
   file = coaxial.msh
+  allow_renumbering = false
 []
 
 [UserObjects]
@@ -97,7 +98,7 @@
     type = FunctionDirichletBC
     variable = To
     boundary = left
-    function = 'if(t<3600, 283.15, if(t>9000, 313.15, 283.15))'
+    function = 'if(t<1000, 283.15, if(t>2000, 313.15, 283.15))'
   [../]
   [./Qo_bc]
     type = DirichletBC
@@ -105,12 +106,6 @@
     boundary = left
     value = 0.02
   [../]
-  # [./Ti_bc]
-  #   type = MoskitoCoupledDirichletBC
-  #   variable = Ti
-  #   boundary = left
-  #   coupled_var = To
-  # [../]
 []
 
 [Variables]
@@ -229,13 +224,6 @@
 []
 
 [Preconditioning]
-  active = pn1
-  [./p1]
-    type = SMP
-    full = true
-    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = ' bjacobi  ilu          NONZERO                 '
-  [../]
   [./pn1]
     type = SMP
     full = true
@@ -243,35 +231,12 @@
     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -snes_type -snes_linesearch_type'
     petsc_options_value = ' bjacobi  ilu          NONZERO                   newtonls   basic               '
   [../]
-
-  [./p4]
-    type = FSP
-    full = true
-    topsplit = pT
-    [./pT]
-      splitting = 'p T'
-      splitting_type = multiplicative
-      petsc_options_iname = '-ksp_type -pc_type -snes_type -snes_linesearch_type'
-      petsc_options_value = 'fgmres lu newtonls basic'
-    [../]
-    [./p]
-      vars = 'Po To Qo'
-      petsc_options_iname = '-ksp_type -pc_type -sub_pc_type'
-      petsc_options_value = 'fgmres asm ilu'
-    [../]
-    [./T]
-      vars = 'Ti'
-      petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type'
-      petsc_options_value = 'preonly hypre boomeramg'
-    [../]
-  [../]
-
 []
 
 [Executioner]
   type = Transient
   dt = 100
-  end_time = 100
+  end_time = 3000
   l_tol = 1e-8
   l_max_its = 50
   nl_rel_tol = 1e-8
@@ -281,11 +246,17 @@
   # automatic_scaling = true
 []
 
+[Postprocessors]
+  [./node]
+    type = NodalVariableValue
+    nodeid = 3
+    variable = To
+    outputs = csv
+  [../]
+[]
+
 [Outputs]
   exodus = true
+  csv = true
   print_linear_residuals = false
 []
-#
-# [Debug]
-#   show_var_residual_norms = true
-# []
