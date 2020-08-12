@@ -73,11 +73,15 @@ protected:
   Real Grashof(Real Uto, Real Temp, Real grav);
   // Calculate Rayleigh Number needed for hc calculation
   Real Rayleigh(Real grav,Real Uto, Real Temp);
+  // Calculate convective heat transfer coeff
+  Real Conv_coeff();
   // Radius tubing outer
   MaterialProperty<Real> & _RadTubout;
   // Variable to output formation temperature
   MaterialProperty<Real> & _TRock;
-    // Emissivity of inside casing surface
+  // thermal conductivity of working fluid
+  Real _brine_conductivity;
+  // Emissivity of outside tubin/insulation surface
   Real _Annulus_eao;
   // Emissivity of outside tubin/insulation surface
   Real _Annulus_eai;
@@ -129,6 +133,19 @@ protected:
   std::vector<Real> _well_assembly;
   // Well direction for correction of gravity vector in terms of deviated well
   const MaterialProperty<RealVectorValue> & _well_dir;
+  // Reynolds number
+  const MaterialProperty<Real> & _Re;
+  // viscosity of working fluid
+  const MaterialProperty<Real> & _vis;
+  // soecific heat capacity of working fluid
+  const MaterialProperty<Real> & _cp;
+  // thermal conductivity
+  const MaterialProperty<Real> & _H_dia;
+  // The constant thermal conductivity of fluid
+  const MaterialProperty<Real> & _lambda;
+  // The convective heat transfer factor
+  const MaterialProperty<Real> & _hf;
+  const bool & _add_hf;
   // Stefan Bolzmann Konstante in SI units (W/(m² * K⁴))
   Real Boltz = 0.00000005670367;
   Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
