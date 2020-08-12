@@ -60,7 +60,7 @@ validParams<MoskitoLatHeat_Inc_Formation_1p>()
     params.addParam<Real>("manual_time", 86400,
           "Time defined by the user for steady state simulations (s)");
     MooseEnum dt_model
-          ("Satman_eq15 Satman_eq16 Satman_eq17 Satman_eq18 Satman_eq19 Ramey_1962 Hasan_Kabir_2012", "Ramey_1962");
+          ("Satman_eq15 Satman_eq16 Satman_eq17 Satman_eq18 Satman_eq19 Ramey_1981 Hasan_Kabir_2012", "Ramey_1981");
     params.addParam<MooseEnum>("nondimensional_time_function", dt_model,
                 "Select a function from the list");
 
@@ -189,7 +189,7 @@ MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
   break;
 
   case time_func_cases::Satman_eq17:
-    ft = 2.0 * std::pow(t_fac / PI,0.5);
+    ft = 2.0 * std::sqrt(t_fac / PI);
   break;
 
   case time_func_cases::Satman_eq18:
@@ -200,16 +200,9 @@ MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
     ft = std::log(1.0 + (1.571 - 1.0 / (4.959 + std::sqrt(t_fac))) * std::sqrt(t_fac));
   break;
 
-  case time_func_cases::Ramey_1962:
-    if(t_fac<=20)
-      // fit with 1% deviation from Ramey_1962
-      ft = std::log(1.0 + 1.7 * std::sqrt(t_fac));
-    else if(t_fac<=100)
-      // fit with 5% deviation from Ramey_1962
-      ft = std::log(1.7 * std::sqrt(t_fac));
-    else
-      // Ramey_1962
-      ft = std::log(2.0 * std::sqrt(_alpha_form * _time) / _Rwf) - 0.29;
+  case time_func_cases::Ramey_1981:
+    // fit with 1% deviation from Ramey_1981
+    ft = std::log(1.0 + 1.7 * std::sqrt(t_fac));
   break;
 
   case time_func_cases::Hasan_Kabir_2012:

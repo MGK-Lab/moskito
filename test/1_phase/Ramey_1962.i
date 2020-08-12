@@ -4,25 +4,36 @@
   type = GeneratedMesh
   dim = 1
   xmin = 0
-  xmax = 2500
-  nx = 400
+  xmax = 30
+  nx = 30
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./water_uo]
+      type = SimpleFluidProperties
+      density0 = 1000
+      cp = 4190
+      thermal_conductivity = 0.59
+    [../]
+  [../]
 []
 
 [UserObjects]
   [./viscosity]
-    type = MoskitoViscosityWaterSmith
+    type = MoskitoViscosityConst
+    viscosity = 1.14e-3
   [../]
   [./eos]
-    type = MoskitoEOS1P_IdealFluid
-    specific_heat = 3160
-    reference_temperature = 273.15
+    type = MoskitoEOS1P_FPModule
+    SinglePhase_fp = water_uo
   [../]
 []
 
 [Functions]
   [./grad_func]
     type = ParsedFunction
-    value = '293.15 + 0.09 * x'
+    value = '55'
   [../]
 []
 
@@ -33,27 +44,25 @@
     pressure = p
     flowrate = q
     well_direction = x
-    well_diameter = 0.3
+    well_diameter = 0.25826
     eos_uo = eos
     viscosity_uo = viscosity
     roughness_type = smooth
-    gravity = '0.0 0 0'
+    gravity = '0 0 0'
     well_type = injection
-    outputs = exodus
-    output_properties = 'temperature density well_velocity specific_heat well_reynolds_no well_moody_friction viscosity diameter'
   [../]
   [./Lateral]
     type = MoskitoLatHeat_Inc_Formation_1p
      temperature_inner = T
-     outer_diameters = '0.3 0.300000000001'
-     conductivities = '40.0'
+     outer_diameters = '0.25826 0.27 0.28'
+     conductivities = '1.3 0.73'
      # Rock parameters
-     formation_density = 2650
-     formation_thermal_conductivity = 2.92
-     formation_heat_capacity = 1000
+     formation_density = 1800
+     formation_thermal_conductivity = 2.78018
+     formation_heat_capacity = 1778
      # Configuration of material
      formation_temperature_function = grad_func
-     nondimensional_time_function =  Satman_eq16
+     nondimensional_time_function = Ramey_1981
      output_properties = 'wellbore_formation_temperature well_thermal_resistivity'
      outputs = exodus
    [../]
@@ -61,37 +70,25 @@
 
 [Variables]
   [./T]
-    scaling = 1e-2
-    initial_condition = 293.15
+    initial_condition = 20
   [../]
+[]
+
+[AuxVariables]
   [./p]
     initial_condition = 1.0e5
-    scaling = 1e1
   [../]
   [./q]
-    initial_condition = 0.020038
-    scaling = 1e-2
+    initial_condition = 2e-4
   [../]
 []
 
 [BCs]
-  [./qbc]
-    type = DirichletBC
-    variable = q
-    boundary = right
-    value = 0.020038
-  [../]
-  [./pbc]
-    type = DirichletBC
-    variable = p
-    boundary = left
-    value = 1.0e5
-  [../]
   [./Tbc]
     type = DirichletBC
     variable = T
     boundary = left
-    value =  293.15
+    value = 20
   [../]
 [../]
 
@@ -102,22 +99,16 @@
     pressure = p
     flowrate = q
   [../]
-  [./qkernel1]
-    type = MoskitoMomentum_1p1c
-    variable = q
+  [./Ttkernel]
+    type = MoskitoTimeEnergy_1p1c
+    variable = T
     pressure = p
-    temperature = T
-  [../]
-  [./pkernel1]
-    type = MoskitoMass_1p1c
-    variable = p
-    temperature = T
     flowrate = q
   [../]
-  # [./heat]
-  #   type = MoskitoLateralHeat_1p
-  #   variable = T
-  # [../]
+  [./heat]
+    type = MoskitoLatHeatIncFormation_1p
+    variable = T
+  [../]
 []
 
 [Preconditioning]
@@ -132,19 +123,19 @@
 []
 
 [Executioner]
-  type = Steady
-  dt = 100
-  end_time = 2000
-
+  type = Transient
+  dt = 86400
+  end_time = 2592000
   l_max_its = 50
   l_tol = 1e-10
   nl_rel_tol = 1e-8
   nl_max_its = 50
   solve_type = NEWTON
   nl_abs_tol = 1e-7
+  []
 []
 
 [Outputs]
   exodus = true
-  print_linear_residuals = true
+  print_linear_residuals = false
 []
