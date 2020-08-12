@@ -21,50 +21,48 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#pragma once
+#include "MoskitoLatHeatCoaxial_1p.h"
 
-#include "MoskitoFluidWellGeneral.h"
-#include "MoskitoEOS1P.h"
-#include "MoskitoViscosity1P.h"
-
-class MoskitoFluidWell_1p1c;
+registerMooseObject("MoskitoApp", MoskitoLatHeatCoaxial_1p);
 
 template <>
-InputParameters validParams<MoskitoFluidWell_1p1c>();
-
-class MoskitoFluidWell_1p1c : public MoskitoFluidWellGeneral
+InputParameters
+validParams<MoskitoLatHeatCoaxial_1p>()
 {
-public:
-  MoskitoFluidWell_1p1c(const InputParameters & parameters);
-  virtual void computeQpProperties() override;
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Heat exchange between inner and outer pipes");
+  params.addRequiredCoupledVar("Tsur", "temperature of other pipe");
+  return params;
+}
 
-protected:
-  // Userobject to equation of state
-  const MoskitoEOS1P & eos_uo;
-  // Userobject to Viscosity Eq
-  const MoskitoViscosity1P & viscosity_uo;
-  // The convective heat transfer factor of fluid in coaxial configuration
-  MaterialProperty<Real> & _hf;
-  // The vescosity
-  MaterialProperty<Real> & _vis;
-  // The constant thermal conductivity of fluid
-  MaterialProperty<Real> & _lambda;
-  // The specific heat at constant pressure
-  MaterialProperty<Real> & _cp;
-  // The density
-  MaterialProperty<Real> & _rho;
-  // The first derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt temperature
-  MaterialProperty<Real> & _drho_dT;
-  // Enthalpy from P and T
-  MaterialProperty<Real> & _h;
+MoskitoLatHeatCoaxial_1p::MoskitoLatHeatCoaxial_1p(const InputParameters & parameters)
+  : Kernel(parameters),
+  _Tsur(coupledValue("Tsur")),
+  _Tsur_var_number(coupled("Tsur")),
+  _area(getMaterialProperty<Real>("well_area")),
+  _ohc(getMaterialProperty<Real>("overall_heat_transfer_coeff"))
+  {
+  }
 
-  // The coupled temperature
-  const VariableValue & _T;
-  // The coupled flow rate
-  const VariableValue & _flow;
+Real
+MoskitoLatHeatCoaxial_1p::computeQpResidual()
+{
+  return _test[_i][_qp] * _ohc[_qp] * 2.0 * PI * (_u[_qp] - _Tsur[_qp]) / _area[_qp];
+}
 
-  // function for calculating convective heat transfer coeff
-  Real Conv_coeff();
-};
+Real
+MoskitoLatHeatCoaxial_1p::computeQpJacobian()
+{
+  return _test[_i][_qp] * _ohc[_qp] * 2.0 * PI * _phi[_j][_qp] / _area[_qp];
+}
+
+Real
+MoskitoLatHeatCoaxial_1p::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  Real s = 0.0;
+  if (jvar == _Tsur_var_number)
+  {
+     s -= _test[_i][_qp] * _ohc[_qp] * 2.0 * PI * _phi[_j][_qp] / _area[_qp];
+  }
+  return s;
+}

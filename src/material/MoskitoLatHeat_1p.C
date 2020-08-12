@@ -80,6 +80,8 @@ validParams<MoskitoLatHeat_1p>()
     params.addParam<MooseEnum>("DimTime_calculation_model", dt_model,
                 "Define calculation type of dimensionless time: "
                 "Ramey1962, Kutun2015");
+    params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal resistance "
+                "caused by convective term");
     return params;
 }
 
@@ -110,7 +112,14 @@ MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
     _tol(getParam<Real>("derivative_tolerance")),
     _independ_gravity(getParam<RealVectorValue>("Ind_grav")),
     _well_assembly(getParam<std::vector<Real>>("well_diameter_vector")),
-    _well_dir(getMaterialProperty<RealVectorValue>("well_direction_vector"))
+    _well_dir(getMaterialProperty<RealVectorValue>("well_direction_vector")),
+    _Re(getMaterialProperty<Real>("well_reynolds_no")),
+    _vis(getMaterialProperty<Real>("viscosity")),
+    _cp(getMaterialProperty<Real>("specific_heat")),
+    _H_dia(getMaterialProperty<Real>("hydraulic_diameter")),
+    _lambda(getMaterialProperty<Real>("fluid_thermal_conductivity")),
+    _hf(getMaterialProperty<Real>("convective_heat_factor")),
+    _add_hf(getParam<bool>("convective_thermal_resistance"))
 {
 Timing = (parameters.isParamSetByUser("user_defined_time")) ? getParam<Real>("user_defined_time") : _t;
 }
@@ -400,6 +409,11 @@ MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
 
     hc = ConvectiveHeatTransferCoefficient(scalar, _T[_qp], grav);
     Aux += 1.0 / (_rai * (hc + hr));
+  }
+
+  if (_add_hf && _Re[_qp]>0.0)
+  {
+  Aux += 1.0 / (_well_assembly[0] * 0.5 * _hf[_qp]);
   }
 
   Uto = 1.0 / (Aux * (_well_assembly[1] / 2.0));

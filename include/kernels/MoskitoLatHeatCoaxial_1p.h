@@ -23,66 +23,30 @@
 
 #pragma once
 
-#include "Material.h"
+#include "Kernel.h"
 
-class MoskitoFluidWellGeneral;
+class MoskitoLatHeatCoaxial_1p;
 
 template <>
-InputParameters validParams<MoskitoFluidWellGeneral>();
+InputParameters validParams<MoskitoLatHeatCoaxial_1p>();
 
-class MoskitoFluidWellGeneral : public Material
+class MoskitoLatHeatCoaxial_1p : public Kernel
 {
 public:
-  MoskitoFluidWellGeneral(const InputParameters & parameters);
-  virtual void computeQpProperties() override;
+  MoskitoLatHeatCoaxial_1p(const InputParameters & parameters);
 
 protected:
-  // Velocity in well
-  MaterialProperty<Real> & _u;
-  // Reynolds number in well
-  MaterialProperty<Real> & _Re;
-  // Moody friction coefficient
-  MaterialProperty<Real> & _friction;
-  // Well diameter
-  MaterialProperty<Real> & _dia;
-  // Well area
-  MaterialProperty<Real> & _area;
-  // Well wetted perimeter
-  MaterialProperty<Real> & _perimeter;
-  // unit vector along well towards bottomhole
-  MaterialProperty<RealVectorValue> & _well_dir;
-  // The gravity acceleration as a vector
-  MaterialProperty<RealVectorValue> & _gravity;
-  // thermal conductivity of casing and fluid
-  MaterialProperty<Real> & _lambda;
-  // Direction of flow, the positive sign is production and vice versa
-  MaterialProperty<Real> & _well_sign;
-  // Hudraulic diameter
-  MaterialProperty<Real> & _H_dia;
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // The coupled pressure
-  const VariableValue & _P;
+  const VariableValue & _Tsur;
+  unsigned _Tsur_var_number;
 
-  // function to calculate friction factor using Moody chart
-  void MoodyFrictionFactor(Real & friction, Real rel_roughness, Real ReNo, MooseEnum roughness_type);
+  // well area
+  const MaterialProperty<Real> & _area;
+  // overall heat transfer coeff
+  const MaterialProperty<Real> & _ohc;
 
-  // function for calculating the unit vector of well orientation
-  RealVectorValue WellUnitVector();
-
-  // local variables
-  RealVectorValue _g;
-  Real _lambda0;
-  Real _thickness;
-  Real _d;
-  Real _rel_roughness;
-  Real _u_f;
-  Real _u_area;
-  Real _u_perimeter;
-  bool _f_defined;
-  bool _area_defined;
-  bool _perimeter_defined;
-  MooseEnum _roughness_type;
-  MooseEnum _well_direction;
-  MooseEnum _well_type;
   const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };

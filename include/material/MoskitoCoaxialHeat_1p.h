@@ -1,7 +1,7 @@
 /**************************************************************************/
 /*  MOSKITO - Multiphysics cOupled Simulator toolKIT for wellbOres        */
 /*                                                                        */
-/*  Copyright (C) 2017 by Maziar Gholami Korzani                          */
+/*  Copyright (C) 2019 by Maziar Gholami Korzani                          */
 /*  Karlsruhe Institute of Technology, Institute of Applied Geosciences   */
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
@@ -23,19 +23,19 @@
 
 #pragma once
 
-#include "MoskitoFluidWellGeneral.h"
+#include "Material.h"
 #include "MoskitoEOS1P.h"
 #include "MoskitoViscosity1P.h"
 
-class MoskitoFluidWell_1p1c;
+class MoskitoCoaxialHeat_1p;
 
 template <>
-InputParameters validParams<MoskitoFluidWell_1p1c>();
+InputParameters validParams<MoskitoCoaxialHeat_1p>();
 
-class MoskitoFluidWell_1p1c : public MoskitoFluidWellGeneral
+class MoskitoCoaxialHeat_1p : public Material
 {
 public:
-  MoskitoFluidWell_1p1c(const InputParameters & parameters);
+  MoskitoCoaxialHeat_1p(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
 protected:
@@ -43,28 +43,31 @@ protected:
   const MoskitoEOS1P & eos_uo;
   // Userobject to Viscosity Eq
   const MoskitoViscosity1P & viscosity_uo;
-  // The convective heat transfer factor of fluid in coaxial configuration
-  MaterialProperty<Real> & _hf;
-  // The vescosity
-  MaterialProperty<Real> & _vis;
-  // The constant thermal conductivity of fluid
-  MaterialProperty<Real> & _lambda;
-  // The specific heat at constant pressure
-  MaterialProperty<Real> & _cp;
-  // The density
-  MaterialProperty<Real> & _rho;
-  // The first derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt temperature
-  MaterialProperty<Real> & _drho_dT;
-  // Enthalpy from P and T
-  MaterialProperty<Real> & _h;
-
-  // The coupled temperature
-  const VariableValue & _T;
-  // The coupled flow rate
-  const VariableValue & _flow;
-
-  // function for calculating convective heat transfer coeff
-  Real Conv_coeff();
+  // overall heat transfer coeff
+  MaterialProperty<Real> & _ohc;
+  Real _rio;
+  Real _wt;
+  Real _roi;
+  Real _ki;
+  // The coupled temperature of inner pipe
+  const VariableValue & _T_i;
+  // The coupled flow rate of inner pipe
+  const VariableValue & _flow_i;
+  // The coupled pressure of inner pipe
+  const VariableValue & _p_i;
+  // The coupled temperature of outer pipe
+  const VariableValue & _T_o;
+  // The coupled flow rate of outer pipe
+  const VariableValue & _flow_o;
+  // The coupled pressure of outer pipe
+  const VariableValue & _p_o;
+  // Nusslet number inner pipe
+  MaterialProperty<Real> & _nusselt_i;
+  // Nusslet number outer pipe
+  MaterialProperty<Real> & _nusselt_o;
+  // function for calculating convective heat transfer coeff in the inner pipe
+  Real Conv_coeff_inner();
+  // function for calculating convective heat transfer coeff in the outer pipe
+  Real Conv_coeff_outer();
+  Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };

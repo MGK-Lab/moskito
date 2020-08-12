@@ -72,6 +72,7 @@ MoskitoFluidWellGeneral::MoskitoFluidWellGeneral(const InputParameters & paramet
     _gravity(declareProperty<RealVectorValue>("gravity")),
     _lambda(declareProperty<Real>("thermal_conductivity")),
     _well_sign(declareProperty<Real>("flow_direction_sign")),
+    _H_dia(declareProperty<Real>("hydraulic_diameter")),
     _P(coupledValue("pressure")),
     _g(getParam<RealVectorValue>("gravity")),
     _lambda0(getParam<Real>("casing_thermal_conductivity")),
@@ -111,6 +112,7 @@ MoskitoFluidWellGeneral::computeQpProperties()
     _perimeter[_qp] = _u_perimeter;
   }
 
+  _H_dia[_qp] = 4.0 * _area[_qp] / _perimeter[_qp];
   _well_dir[_qp] = WellUnitVector();
   _gravity[_qp] = _g;
   _well_sign[_qp] = _well_type;

@@ -42,7 +42,7 @@
     gravity = '0.0 0 0'
     well_type = injection
     outputs = exodus
-    output_properties = 'temperature density well_velocity specific_heat well_reynolds_no well_moody_friction viscosity diameter'
+    output_properties = 'temperature density well_velocity specific_heat well_reynolds_no well_moody_friction diameter'
   [../]
   [./Lateral]
     type = MoskitoLatHeat_1p
