@@ -180,7 +180,7 @@ MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
 {
   Real ft = 0.0;
 
-  Real t_fac = _alpha_form * _time / _Rwf * _Rwf;
+  Real t_fac = _alpha_form * _time / _Rwf / _Rwf;
 
   switch (_time_func_user)
   {

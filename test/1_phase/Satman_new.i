@@ -93,7 +93,7 @@
     boundary = left
     value =  293.15
   [../]
-[../]
+[]
 
 [Kernels]
   [./Tkernel]

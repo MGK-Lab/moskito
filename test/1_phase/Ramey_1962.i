@@ -1,10 +1,9 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 1
   xmin = 0
   xmax = 30
-  nx = 30
+  nx = 120
 []
 
 [UserObjects]
@@ -30,6 +29,12 @@
     type = ParsedFunction
     value = '273.15+55'
   [../]
+  [./analytic]
+    type = PiecewiseConstant
+    data_file = Ramey_1962_analytical.msh
+    direction = right
+    format = columns
+  [../]
 []
 
 [Materials]
@@ -46,7 +51,7 @@
     manual_friction_factor = 0.0079
     gravity = '0 0 0'
     well_type = injection
-    output_properties = 'well_moody_friction well_reynolds_no well_velocity convective_heat_factor'
+    output_properties = 'convective_heat_factor'
     outputs = exodus
   [../]
   [./Lateral]
@@ -62,7 +67,7 @@
      # Configuration of material
      formation_temperature_function = grad_func
      nondimensional_time_function = Ramey_1981
-     output_properties = 'wellbore_formation_temperature total_thermal_resistivity'
+     output_properties = 'total_thermal_resistivity'
      outputs = exodus
    [../]
 []
@@ -80,6 +85,16 @@
   [./q]
     initial_condition = 2e-4
   [../]
+  [./analytical]
+  [../]
+[]
+
+[AuxKernels]
+  [./analytical]
+    type = FunctionAux
+    variable = analytical
+    function = analytic
+  [../]
 []
 
 [BCs]
@@ -89,7 +104,7 @@
     boundary = left
     value = 293.15
   [../]
-[../]
+[]
 
 [Kernels]
   [./Tkernel]
@@ -123,7 +138,8 @@
 
 [Executioner]
   type = Transient
-  dtmax = 3600
+  scheme = 'bdf2'
+  dtmax = 43200
   end_time = 2592000
   l_max_its = 50
   l_tol = 1e-10
@@ -134,7 +150,7 @@
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
-    growth_factor = 1.01
+    growth_factor = 1.1
   [../]
 []
 

@@ -90,7 +90,7 @@
     boundary = left
     value = 588.70555
   [../]
-[../]
+[]
 
 [Kernels]
   [./hkernel]
