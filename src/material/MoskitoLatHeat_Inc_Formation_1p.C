@@ -52,7 +52,7 @@ validParams<MoskitoLatHeat_Inc_Formation_1p>()
     params.addRequiredParam<Real>("formation_heat_capacity",
           "Specific heat capacity of the formation (J/(kg*K))");
     params.addRequiredParam<Real>("formation_density",
-          "Thermal conductivity of the formation (kg/m^3))");
+          "Density of the formation (kg/m^3))");
     params.addRequiredParam<Real>("formation_thermal_conductivity",
           "Thermal conductivity of the formation (W/(m*K))");
     params.addRequiredParam<FunctionName>("formation_temperature_function",
