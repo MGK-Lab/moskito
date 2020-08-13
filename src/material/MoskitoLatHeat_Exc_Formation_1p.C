@@ -49,8 +49,8 @@ validParams<MoskitoLatHeat_Exc_Formation_1p>()
           "including first tubing inner diameter");
     params.addParam<UserObjectName>("annulus_uo", "",
           "The name of the userobject for annulus");
-    params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal resistance "
-                "caused by convective term at the wall of the inner tubing");
+    params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal"
+          " resistance caused by convective term at the wall of the inner tubing");
     return params;
 }
 

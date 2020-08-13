@@ -56,7 +56,7 @@
      formation_heat_capacity = 1000
      # Configuration of material
      formation_temperature_function = grad_func
-     nondimensional_time_function = Ramey_1981
+     nondimensional_time_function = Ramey_1981_BF
      output_properties = 'total_thermal_resistivity'
      outputs = exodus
    [../]

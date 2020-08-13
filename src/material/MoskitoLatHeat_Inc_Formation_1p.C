@@ -47,8 +47,8 @@ validParams<MoskitoLatHeat_Inc_Formation_1p>()
           "including first tubing inner diameter");
     params.addParam<UserObjectName>("annulus_uo", "",
           "The name of the userobject for annulus");
-    params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal resistance "
-          "caused by convective term at the wall of the inner tubing");
+    params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal"
+          " resistance caused by convective term at the wall of the inner tubing");
     params.addRequiredParam<Real>("formation_heat_capacity",
           "Specific heat capacity of the formation (J/(kg*K))");
     params.addRequiredParam<Real>("formation_density",
@@ -60,9 +60,11 @@ validParams<MoskitoLatHeat_Inc_Formation_1p>()
     params.addParam<Real>("manual_time", 86400,
           "Time defined by the user for steady state simulations (s)");
     MooseEnum dt_model
-          ("Satman_eq15 Satman_eq16 Satman_eq17 Satman_eq18 Satman_eq19 Ramey_1981 Hasan_Kabir_2012 OGS", "Ramey_1981");
+          ("Kutasov2003_constHF Kutasov2005_constWFT Ramey_1981_BF Hasan_Kabir_2012", "Ramey_1981_BF");
     params.addParam<MooseEnum>("nondimensional_time_function", dt_model,
-          "Select a function from the list");
+          "Select a function from the list (Kutasov2003 with constant heat flux,"
+          " Kutasov2005 with constant well-formation temperature, Ramey 1981 "
+          "best fit, Hasan&Kabir2012)");
 
     return params;
 }
@@ -184,40 +186,24 @@ MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
 
   switch (_time_func_user)
   {
-  case time_func_cases::Satman_eq15:
-    ft = std::log(1.0 + 1.4986 * std::sqrt(t_fac));
+  case time_func_cases::Kutasov2003_constHF:
+    if(t_fac<0.194598)
+      ft = 2.0 * std::sqrt(t_fac / PI);
+    else
+      ft = std::log(1.0 + (1.781 - 1.0 / (2.701 + std::sqrt(t_fac))) * std::sqrt(t_fac));
   break;
 
-  case time_func_cases::Satman_eq16:
-    ft = std::log(1.0 + (1.781 - 1.0 / (2.701 + std::sqrt(t_fac))) * std::sqrt(t_fac));
-  break;
-
-  case time_func_cases::Satman_eq17:
-    ft = 2.0 * std::sqrt(t_fac / PI);
-  break;
-
-  case time_func_cases::Satman_eq18:
-    ft = std::log(1.0 + 1.128 * std::sqrt(t_fac));
-  break;
-
-  case time_func_cases::Satman_eq19:
+  case time_func_cases::Kutasov2005_constWFT:
     ft = std::log(1.0 + (1.571 - 1.0 / (4.959 + std::sqrt(t_fac))) * std::sqrt(t_fac));
   break;
 
-  case time_func_cases::Ramey_1981:
+  case time_func_cases::Ramey_1981_BF:
     // fit with 1% deviation from Ramey_1981
     ft = std::log(1.0 + 1.7 * std::sqrt(t_fac));
   break;
 
   case time_func_cases::Hasan_Kabir_2012:
     ft = std::log(std::exp(-0.2*t_fac) + (1.5 - 0.3719 * std::exp(-t_fac)) * std::sqrt(t_fac));
-  break;
-
-  case time_func_cases::OGS:
-    if(t_fac<=1.5)
-      ft = 1.1281 * std::sqrt(t_fac) * (1.0 - 0.3 * std::sqrt(t_fac));
-    else
-      ft = (0.4063 + 0.5 * std::log(t_fac)) * (1.0 + 0.6 / std::sqrt(t_fac));
   break;
   }
 
