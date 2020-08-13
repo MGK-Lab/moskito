@@ -1,4 +1,3 @@
-
 # Validation of Heat exchange using the Paper from Satman & Tureyen 2016
 [Mesh]
   type = GeneratedMesh
@@ -15,7 +14,12 @@
   [./eos]
     type = MoskitoEOS1P_IdealFluid
     specific_heat = 3160
+    reference_density = 1000
     reference_temperature = 273.15
+    reference_enthalpy = 0
+    thermal_expansion_0 = 0
+    thermal_expansion_1 = 0
+    bulk_modulus = 2e15
   [../]
 []
 
@@ -38,60 +42,50 @@
     viscosity_uo = viscosity
     roughness_type = smooth
     gravity = '0.0 0 0'
-    well_type = injection
-    outputs = exodus
-    output_properties = 'temperature density well_velocity specific_heat well_reynolds_no well_moody_friction viscosity diameter'
+    well_type = production
   [../]
   [./Lateral]
     type = MoskitoLatHeat_Inc_Formation_1p
      temperature_inner = T
-     outer_diameters = '0.3 0.300000000001'
-     conductivities = '40.0'
+     outer_diameters = '0.3 0.30000000001'
+     conductivities = '2.92'
+     convective_thermal_resistance = true
      # Rock parameters
      formation_density = 2650
      formation_thermal_conductivity = 2.92
      formation_heat_capacity = 1000
      # Configuration of material
      formation_temperature_function = grad_func
-     nondimensional_time_function =  Satman_eq16
-     output_properties = 'wellbore_formation_temperature well_thermal_resistivity'
+     nondimensional_time_function = Ramey_1981
+     output_properties = 'total_thermal_resistivity'
      outputs = exodus
    [../]
 []
 
 [Variables]
   [./T]
-    scaling = 1e-2
-    initial_condition = 293.15
+    [./InitialCondition]
+      type = FunctionIC
+      function = grad_func
+    [../]
   [../]
+[]
+
+[AuxVariables]
   [./p]
-    initial_condition = 1.0e5
-    scaling = 1e1
+    initial_condition = 101325
   [../]
   [./q]
-    initial_condition = 0.020038
-    scaling = 1e-2
+    initial_condition = 0.02
   [../]
 []
 
 [BCs]
-  [./qbc]
-    type = DirichletBC
-    variable = q
-    boundary = right
-    value = 0.020038
-  [../]
-  [./pbc]
-    type = DirichletBC
-    variable = p
-    boundary = left
-    value = 1.0e5
-  [../]
   [./Tbc]
     type = DirichletBC
     variable = T
-    boundary = left
-    value =  293.15
+    boundary = right
+    value =  518.15
   [../]
 []
 
@@ -102,22 +96,16 @@
     pressure = p
     flowrate = q
   [../]
-  [./qkernel1]
-    type = MoskitoMomentum_1p1c
-    variable = q
+  [./Ttkernel]
+    type = MoskitoTimeEnergy_1p1c
+    variable = T
     pressure = p
-    temperature = T
-  [../]
-  [./pkernel1]
-    type = MoskitoMass_1p1c
-    variable = p
-    temperature = T
     flowrate = q
   [../]
-  # [./heat]
-  #   type = MoskitoLateralHeat_1p
-  #   variable = T
-  # [../]
+  [./heat]
+    type = MoskitoLatHeatIncFormation_1p
+    variable = T
+  [../]
 []
 
 [Preconditioning]
@@ -132,16 +120,18 @@
 []
 
 [Executioner]
-  type = Steady
-  dt = 100
-  end_time = 2000
-
+  type = Transient
+  end_time = 2592000
   l_max_its = 50
   l_tol = 1e-10
   nl_rel_tol = 1e-8
   nl_max_its = 50
   solve_type = NEWTON
   nl_abs_tol = 1e-7
+  [./TimeStepper]
+    type = TimeSequenceStepper
+    time_sequence = '0 8640 86400 864000 2592000'
+  [../]
 []
 
 [Outputs]

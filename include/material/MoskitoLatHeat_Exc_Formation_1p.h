@@ -56,7 +56,7 @@ protected:
   // Fluid temperature at the center of the pipe
   const VariableValue & _Tf;
   // Formation temperature at the formation-casing interface
-  const VariableValue & _Tcf;
+  const VariableValue & _Twf;
 
   // tubing outer radius
   MaterialProperty<Real> & _Rto;
@@ -76,7 +76,7 @@ protected:
   const MaterialProperty<RealVectorValue> & _gravity;
   const MaterialProperty<RealVectorValue> & _well_dir;
   const MaterialProperty<Real> & _Re;
-  const MaterialProperty<Real> & _hf;
+  const MaterialProperty<Real> * _hf;
   const bool & _add_hf;
 
   // Annulus outer and inner radiuses

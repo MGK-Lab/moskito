@@ -50,7 +50,7 @@ validParams<MoskitoLatHeat_Exc_Formation_1p>()
     params.addParam<UserObjectName>("annulus_uo", "",
           "The name of the userobject for annulus");
     params.addParam<bool>("convective_thermal_resistance", false, "Consider thermal resistance "
-                "caused by convective term");
+                "caused by convective term at the wall of the inner tubing");
     return params;
 }
 
@@ -58,7 +58,7 @@ MoskitoLatHeat_Exc_Formation_1p::MoskitoLatHeat_Exc_Formation_1p(const InputPara
   : Material(parameters),
     NewtonIteration(parameters),
     _Tf(coupledValue("temperature_inner")),
-    _Tcf(coupledValue("temperature_outer")),
+    _Twf(coupledValue("temperature_outer")),
     _Rto(declareProperty<Real>("tubing_outer_radius")),
     _Uto(declareProperty<Real>("well_thermal_resistivity")),
     _tol(getParam<Real>("derivative_tolerance")),
@@ -68,16 +68,11 @@ MoskitoLatHeat_Exc_Formation_1p::MoskitoLatHeat_Exc_Formation_1p(const InputPara
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),
     _well_dir(getMaterialProperty<RealVectorValue>("well_direction_vector")),
     _Re(getMaterialProperty<Real>("well_reynolds_no")),
-    _hf(getMaterialProperty<Real>("convective_heat_factor")),
     _add_hf(getParam<bool>("convective_thermal_resistance"))
 {
-  if (_Dti[_qp] != _OD_vec[0])
-    mooseError(name(),"The diameter provided in fluid flow material did not ",
-              "match with the first tubing inner diameter provided here.\n");
-
-  for (int i = 0; i < _OD_vec.size() ; i++)
-    if (_OD_vec[i] < _OD_vec[i+1])
-      mooseError(name(),"Layers with zero thikness detected, check outer_dimeters.\n");
+  for (int i = 0; i < _OD_vec.size()-1 ; i++)
+    if (_OD_vec[i] >= _OD_vec[i+1])
+      mooseError(name()," Layers with zero thikness detected, check outer_dimeters.\n");
 
   if (_OD_vec.size() != _lambda_vec.size() + 1)
     mooseError(name(),"Vector conductivities has to be in size 1 element "
@@ -98,14 +93,20 @@ MoskitoLatHeat_Exc_Formation_1p::MoskitoLatHeat_Exc_Formation_1p(const InputPara
     mooseError(name(),"Either annulus_uo or zero conductivity is not provided to model annulus.\n");
   else
     _annulus_uo = NULL;
+
+  _hf = _add_hf ? &getMaterialProperty<Real>("convective_heat_factor") : NULL;
 }
 
 
 void
 MoskitoLatHeat_Exc_Formation_1p::computeQpProperties()
 {
-  _Rto[_qp] = _OD_vec[1] / 2.0;
+  if (_Dti[_qp] != _OD_vec[0])
+    mooseError(name(),"The diameter provided in fluid flow material did not ",
+              "match with the first tubing inner diameter provided here.\n");
+
   _Uto[_qp] = 0.0;
+  _Rto[_qp] = _OD_vec[1] / 2.0;
 
   if (_annulus_ind)
   {
@@ -119,11 +120,10 @@ MoskitoLatHeat_Exc_Formation_1p::computeQpProperties()
       if (_lambda_vec[i] != 0.0)
         _Uto[_qp] += std::log(_OD_vec[i+1] / _OD_vec[i]) / _lambda_vec[i];
     if (_add_hf && _Re[_qp]>0.0)
-      _Uto[_qp] += 1.0 / (_OD_vec[0] * 0.5 * _hf[_qp]);
+      _Uto[_qp] += 1.0 / (_OD_vec[0] * 0.5 * (*_hf)[_qp]);
     _Uto[_qp] *= _Rto[_qp];
     _Uto[_qp] = 1.0 / _Uto[_qp];
   }
-
 }
 
 Real

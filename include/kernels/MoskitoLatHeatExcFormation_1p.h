@@ -26,26 +26,28 @@
 
 #include "Kernel.h"
 
-class MoskitoLateralHeat_1p;
+class MoskitoLatHeatExcFormation_1p;
 
 template <>
-InputParameters validParams<MoskitoLateralHeat_1p>();
+InputParameters validParams<MoskitoLatHeatExcFormation_1p>();
 
-class MoskitoLateralHeat_1p : public Kernel
+class MoskitoLatHeatExcFormation_1p : public Kernel
 {
 public:
-  MoskitoLateralHeat_1p(const InputParameters & parameters);
+  MoskitoLatHeatExcFormation_1p(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
   // Radius tubing outer
   const MaterialProperty<Real> & _rto;
   // Thermal wellbore resistivity
   const MaterialProperty<Real> & _Uto;
-  // Temperature at formation - cement boundary
-  const MaterialProperty<Real> & _Twb;
+  // Formation temperature at the formation-casing interface
+  const VariableValue & _Twf;
+  unsigned _Twf_var_number;
   // Diameter filled with liquid = _rti
   const MaterialProperty<Real> & _area;
   const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
