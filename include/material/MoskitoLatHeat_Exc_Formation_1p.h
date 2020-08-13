@@ -66,10 +66,10 @@ protected:
   // Tolerance of finite difference derivation
   const Real _tol;
 
-  // conductivities vector
-  std::vector<Real> _lambda_vec;
   // outer diamters of well complition
   std::vector<Real> _OD_vec;
+  // conductivities vector
+  std::vector<Real> _lambda_vec;
 
   // imported from other materials
   const MaterialProperty<Real> & _Dti;
