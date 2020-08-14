@@ -26,7 +26,7 @@
 
 #include "Material.h"
 #include "Function.h"
-#include "MoskitoSUPG.h"
+#include "MoskitoAnnulus.h"
 #include "NewtonIteration.h"
 
 class MoskitoLatHeat_Inc_Formation_1p;
@@ -40,42 +40,43 @@ public:
   MoskitoLatHeat_Inc_Formation_1p(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
-  Real TemperatureWFinterface(const Real & Uto);
+  Real ResistivityNoAnnulus(const int & begin, const int & end, const bool & hf);
   Real nonDtimefunction();
+  Real TemperatureWFinterface(const Real & Uto);
 
-  virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
-  virtual Real computeResidual(const Real trail_value, const Real scalar) override;
-  virtual Real computeDerivative(const Real trail_value, const Real scalar) override;
-  virtual Real initialGuess(const Real trail_value) override;
-  virtual Real minimumPermissibleValue(const Real trail_value) const override
+  virtual Real computeReferenceResidual(const Real trial_value, const Real scalar) override;
+  virtual Real computeResidual(const Real trial_value, const Real scalar) override;
+  virtual Real computeDerivative(const Real trial_value, const Real scalar) override;
+  virtual Real initialGuess(const Real trial_value) override;
+  virtual Real minimumPermissibleValue(const Real trial_value) const override
   {
-    return 0.000000001;
+    return 1.0e-6;
   }
-  virtual Real maximumPermissibleValue(const Real trail_value) const override
+  virtual Real maximumPermissibleValue(const Real trial_value) const override
   {
-    return 100000.0;
+    return 1.0e+6;
   }
 
 protected:
   // Fluid temperature at the center of the pipe
   const VariableValue & _Tf;
 
-  // tubing outer radius
-  MaterialProperty<Real> & _Rto;
   // Well thermal resistivity
   MaterialProperty<Real> & _Uto;
   // total thermal resistivity
   MaterialProperty<Real> & _lambda_t;
-  // temperature at well-formation interface
-  MaterialProperty<Real> & _Twf;
 
   // Tolerance of finite difference derivation
   const Real _tol;
-
   // outer diamters of well complition
   std::vector<Real> _OD_vec;
   // conductivities vector
   std::vector<Real> _lambda_vec;
+
+  // well-formation interface radius
+  Real _Rwf;
+  // tubing outer radius
+  Real _Rto;
 
   const Function & _Tform_func;
   // formation temperature from the function
@@ -98,18 +99,14 @@ protected:
   Real _rai = 0.0, _rao = 0.0;
   unsigned int _annulus_loc = 0;
   bool _annulus_ind = false;
+  const MoskitoAnnulus * _annulus_uo;
 
-  const MoskitoSUPG * _annulus_uo;
-
+  // timing and nondimensional time function time  properties
+  Real _ft;
   Real _time;
   bool _mt = false;
-  Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
-
   MooseEnum _time_func_user;
   enum time_func_cases {Kutasov2003_constHF, Kutasov2005_constWFT, Ramey_1981_BF, Hasan_Kabir_2012};
 
-  // well-formation interface radius
-  Real _Rwf;
-  Real _ft;
-
+  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };

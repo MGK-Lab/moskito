@@ -39,6 +39,29 @@ public:
   virtual void initialize();
   virtual void finalize();
 
+  Real RadiativeHTCoefficient(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real ConvectiveHTCoefficient(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real SurfaceTemperature(const Real & T0, const Real & fac, const Real & deltaT) const;
 
 protected:
+  Real GrashofNo(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real RayleighNo(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real NusseltNo(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+
+  const Real & _eo;
+  const Real & _ei;
+  const Real & _mu;
+  const Real & _lambda;
+  const Real & _cp;
+  const Real & _beta;
+  const Real & _rho;
+  const Real & _g;
+  MooseEnum _hc_method;
+  enum HC_Cases {Dropkin_Sommerscales, Raithby_Hollands, Churchill};
+
+
+  Real _Pr;
+  Real _alpha;;
+  const Real _Boltz = 5.670374419e-8;
+
 };
