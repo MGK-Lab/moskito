@@ -31,30 +31,20 @@ validParams<MoskitoTimeMomentum_2p1c>()
 {
   InputParameters params = validParams<TimeKernel>();
 
-  params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable");
-  params.addRequiredCoupledVar("enthalpy", "Enthalpy nonlinear variable");
+  params.addRequiredCoupledVar("massrate", "Massrate nonlinear variable");
   params.addClassDescription("Time derivative part of momentum conservation equation for "
-                  "2 phase pipe flow and it returns flowrate");
+                  "2 phase pipe flow and it returns pressure");
 
   return params;
 }
 
 MoskitoTimeMomentum_2p1c::MoskitoTimeMomentum_2p1c(const InputParameters & parameters)
   : TimeKernel(parameters),
-    _p_dot(coupledDot("pressure")),
-    _h_dot(coupledDot("enthalpy")),
-    _dp_dot(coupledDotDu("pressure")),
-    _dh_dot(coupledDotDu("enthalpy")),
-    _p_var_number(coupled("pressure")),
-    _h_var_number(coupled("enthalpy")),
+    _m_dot(coupledDot("massrate")),
+    _dm_dot(coupledDotDu("massrate")),
+    _m_var_number(coupled("massrate")),
     _well_sign(getMaterialProperty<Real>("flow_direction_sign")),
-    _area(getMaterialProperty<Real>("well_area")),
-    _rho(getMaterialProperty<Real>("density")),
-    _drho_dp(getMaterialProperty<Real>("drho_dp")),
-    _drho_dh(getMaterialProperty<Real>("drho_dh")),
-    _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
-    _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
-    _drho_dph(getMaterialProperty<Real>("drho_dph"))
+    _area(getMaterialProperty<Real>("well_area"))
 {
 }
 
@@ -63,11 +53,7 @@ MoskitoTimeMomentum_2p1c::computeQpResidual()
 {
   Real r = 0.0;
 
-  r += _drho_dp[_qp] * _p_dot[_qp];
-  r += _drho_dh[_qp] * _h_dot[_qp];
-  r *= _u[_qp];
-  r += _rho[_qp] * _u_dot[_qp];
-  r *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
+  r = _m_dot[_qp] * _well_sign[_qp] / _area[_qp] * _test[_i][_qp];
 
   return r;
 }
@@ -75,15 +61,7 @@ MoskitoTimeMomentum_2p1c::computeQpResidual()
 Real
 MoskitoTimeMomentum_2p1c::computeQpJacobian()
 {
-  Real j = 0.0;
-
-  j += _drho_dp[_qp] * _p_dot[_qp];
-  j += _drho_dh[_qp] * _h_dot[_qp];
-  j *= _phi[_j][_qp];
-  j += _rho[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
-  j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
-
-  return j;
+  return 0.0;
 }
 
 Real
@@ -91,24 +69,9 @@ MoskitoTimeMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real j = 0.0;
 
-  if (jvar == _p_var_number)
+  if (jvar == _m_var_number)
   {
-    j += _drho_dp_2[_qp] * _p_dot[_qp];
-    j += _drho_dp[_qp] * _dp_dot[_qp];
-    j += _drho_dph[_qp] * _h_dot[_qp];
-    j *= _u[_qp];
-    j += _drho_dp[_qp] * _u_dot[_qp];
-    j *= _test[_i][_qp] * _phi[_j][_qp] * _well_sign[_qp] / _area[_qp];
-  }
-
-  if (jvar == _h_var_number)
-  {
-    j += _drho_dph[_qp] * _p_dot[_qp];
-    j += _drho_dh_2[_qp] * _h_dot[_qp];
-    j += _drho_dh[_qp] * _dh_dot[_qp];
-    j *= _u[_qp];
-    j += _drho_dh[_qp] * _u_dot[_qp];
-    j *= _test[_i][_qp] * _phi[_j][_qp] * _well_sign[_qp] / _area[_qp];
+    j = _dm_dot[_qp] * _phi[_j][_qp] * _well_sign[_qp] / _area[_qp] * _test[_i][_qp];
   }
 
   return j;

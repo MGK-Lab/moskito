@@ -23,30 +23,30 @@
 
 #pragma once
 
-#include "TimeKernel.h"
+#include "Kernel.h"
 
-class MoskitoTimeMomentum_2p1c;
+class MoskitoLatHeatCoaxial_1p;
 
 template <>
-InputParameters validParams<MoskitoTimeMomentum_2p1c>();
+InputParameters validParams<MoskitoLatHeatCoaxial_1p>();
 
-class MoskitoTimeMomentum_2p1c : public TimeKernel
+class MoskitoLatHeatCoaxial_1p : public Kernel
 {
 public:
-  MoskitoTimeMomentum_2p1c(const InputParameters & parameters);
+  MoskitoLatHeatCoaxial_1p(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // The required values for massrate coupling
-  const VariableValue & _m_dot;
-  const VariableValue & _dm_dot;
-  const unsigned int _m_var_number;
+  const VariableValue & _Tsur;
+  unsigned _Tsur_var_number;
 
-  // The sign of well flow direction
-  const MaterialProperty<Real> & _well_sign;
-  // The area of pipe
+  // well area
   const MaterialProperty<Real> & _area;
+  // overall heat transfer coeff
+  const MaterialProperty<Real> & _ohc;
+
+  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };

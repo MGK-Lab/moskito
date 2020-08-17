@@ -1,11 +1,11 @@
 /**************************************************************************/
-/*  MOSKITO - Multiphysics cOupled Simulator toolKIT for wellbOres        */
+/*  TIGER - THMC sImulator for GEoscience Research                        */
 /*                                                                        */
 /*  Copyright (C) 2017 by Maziar Gholami Korzani                          */
 /*  Karlsruhe Institute of Technology, Institute of Applied Geosciences   */
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
-/*  This file is part of MOSKITO App                                      */
+/*  This file is part of TIGER App                                        */
 /*                                                                        */
 /*  This program is free software: you can redistribute it and/or modify  */
 /*  it under the terms of the GNU General Public License as published by  */
@@ -21,32 +21,47 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#pragma once
+#include "MoskitoCoupledDirichletBC.h"
 
-#include "TimeKernel.h"
-
-class MoskitoTimeMomentum_2p1c;
+registerMooseObject("MoskitoApp", MoskitoCoupledDirichletBC);
 
 template <>
-InputParameters validParams<MoskitoTimeMomentum_2p1c>();
-
-class MoskitoTimeMomentum_2p1c : public TimeKernel
+InputParameters
+validParams<MoskitoCoupledDirichletBC>()
 {
-public:
-  MoskitoTimeMomentum_2p1c(const InputParameters & parameters);
+  InputParameters params = validParams<NodalBC>();
+  params.addRequiredCoupledVar("coupled_var", "Value on the Boundary");
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+MoskitoCoupledDirichletBC::MoskitoCoupledDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters),
+  _coupled_var(coupledValue("coupled_var")),
+  _coupled_var_number(coupled("coupled_var"))
+{
+}
 
-  // The required values for massrate coupling
-  const VariableValue & _m_dot;
-  const VariableValue & _dm_dot;
-  const unsigned int _m_var_number;
+Real
+MoskitoCoupledDirichletBC::computeQpResidual()
+{
+  return _u[_qp] - _coupled_var[_qp];
+}
 
-  // The sign of well flow direction
-  const MaterialProperty<Real> & _well_sign;
-  // The area of pipe
-  const MaterialProperty<Real> & _area;
-};
+Real
+MoskitoCoupledDirichletBC::computeQpJacobian()
+{
+  return 1.0;
+}
+
+Real
+MoskitoCoupledDirichletBC::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  Real j = 0.0;
+
+  if (jvar == _coupled_var_number)
+  {
+    j = -1.0;
+  }
+
+  return j;
+}

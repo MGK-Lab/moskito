@@ -6,6 +6,7 @@
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
 /*  This file is part of MOSKITO App                                      */
+/*  Co-developed by Sebastian Held                                        */
 /*                                                                        */
 /*  This program is free software: you can redistribute it and/or modify  */
 /*  it under the terms of the GNU General Public License as published by  */
@@ -21,35 +22,63 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#pragma once
+#include "MoskitoLatHeatExcFormation_1p.h"
 
-#include "Kernel.h"
-
-class MoskitoLateralHeat_1p;
+registerMooseObject("MoskitoApp", MoskitoLatHeatExcFormation_1p);
 
 template <>
-InputParameters validParams<MoskitoLateralHeat_1p>();
-
-class MoskitoLateralHeat_1p : public Kernel
+InputParameters
+validParams<MoskitoLatHeatExcFormation_1p>()
 {
-public:
-  MoskitoLateralHeat_1p(const InputParameters & parameters);
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Lateral heat exchange between wellbore "
+        "and formation; it should take temperature at the well-formation"
+        " interface from TIGER");
+  params.addRequiredCoupledVar("temperature_outer", "Formation temperature variable at"
+        " the well-formation interface (K)");
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+MoskitoLatHeatExcFormation_1p::MoskitoLatHeatExcFormation_1p(const InputParameters & parameters)
+  : Kernel(parameters),
+  _rto(getMaterialProperty<Real>("radius_tubbing_outer")),
+  _Uto(getMaterialProperty<Real>("thermal_resistivity_well")),
+  _Twf(coupledValue("temperature_outer")),
+  _Twf_var_number(coupled("temperature_outer")),
+  _area(getMaterialProperty<Real>("well_area"))
+{
+}
 
-  // Radius tubing outer
-  const MaterialProperty<Real> & _rto;
-  // Thermal wellbore resistivity
-  const MaterialProperty<Real> & _Uto;
-  // Temperature at formation - cement boundary
-  const MaterialProperty<Real> & _Twb;
-  // Diameter filled with liquid = _rti
-  const MaterialProperty<Real> & _diameter_liquid;
-  const Real gradC_to_gradR = 1.8;
-  const Real Watt_to_Btu_per_h = 3.412141633;
-  const Real m_to_ft    = 3.280839895;
-  const Real Rankine_absol = 491.67;
-  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
-};
+Real
+MoskitoLatHeatExcFormation_1p::computeQpResidual()
+{
+  Real r = 0.0;
+  r =  2.0 * PI * _rto[_qp] * _Uto[_qp] * (_Twf[_qp] - _u[_qp]);
+  r /=  _area[_qp];
+
+  return  -1.0 * r * _test[_i][_qp];
+}
+
+Real
+MoskitoLatHeatExcFormation_1p::computeQpJacobian()
+{
+  Real j = 0.0;
+  j =  -2.0 * PI * _rto[_qp] * _Uto[_qp] * _phi[_j][_qp];
+  j /=  _area[_qp];
+
+  return  -1.0 * j * _test[_i][_qp];
+}
+
+Real
+MoskitoLatHeatExcFormation_1p::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  Real j = 0.0;
+
+  if (jvar == _Twf_var_number)
+  {
+    j =  2.0 * PI * _rto[_qp] * _Uto[_qp] * _phi[_j][_qp];
+    j /=  _area[_qp];
+  }
+
+  return  -1.0 * j * _test[_i][_qp];
+}

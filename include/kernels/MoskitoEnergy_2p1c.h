@@ -40,16 +40,13 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // The coupled flow_rate
-  const VariableValue & _q;
+  // The coupled massrate
+  const VariableValue & _m;
+  const VariableGradient & _grad_m;
+  unsigned _m_var_number;
 
-  // The gradient of the coupled flow_rate
-  const VariableGradient & _grad_q;
-  // The gradient of the coupled pressure
+  // The coupled pressure
   const VariableGradient & _grad_p;
-
-  // Variable numberings
-  unsigned _q_var_number;
   unsigned _p_var_number;
 
   // The area of pipe
@@ -69,27 +66,38 @@ protected:
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
   // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
+  const MaterialProperty<Real> & _drho_dp2;
   // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
+  const MaterialProperty<Real> & _drho_dh2;
   // The second derivative of density wrt enthalpy and pressure
   const MaterialProperty<Real> & _drho_dph;
 
   // The gravity acceleration as a vector
+  const bool & _add_g;
+  Real _gfac;
   const MaterialProperty<RealVectorValue> & _gravity;
 
   // The kappa first derivatives
-  const MaterialProperty<Real> & _dkappa_dh;
-  // The kappa first derivatives
   const MaterialProperty<Real> & _dkappa_dp;
   // The kappa first derivatives
-  const MaterialProperty<Real> & _dkappa_dq;
+  const MaterialProperty<Real> & _dkappa_dh;
+  // The kappa first derivatives
+  const MaterialProperty<Real> & _dkappa_dm;
+  // The kappa second derivatives
+  const MaterialProperty<Real> & _dkappa_dph;
+  // The kappa second derivatives
+  const MaterialProperty<Real> & _dkappa_dpm;
+  // The kappa second derivatives
+  const MaterialProperty<Real> & _dkappa_dhm;
+  // The kappa second derivatives
+  const MaterialProperty<Real> & _dkappa_dp2;
+  // The kappa second derivatives
+  const MaterialProperty<Real> & _dkappa_dh2;
+  // The kappa second derivatives
+  const MaterialProperty<Real> & _dkappa_dm2;
 
-  // The omega first derivatives
-  const MaterialProperty<Real> & _domega_dh;
-  // The omega first derivatives
+  // The omega derivatives
   const MaterialProperty<Real> & _domega_dp;
-  // The omega first derivatives
-  const MaterialProperty<Real> & _domega_dq;
-
+  const MaterialProperty<Real> & _domega_dh;
+  const MaterialProperty<Real> & _domega_dm;
 };

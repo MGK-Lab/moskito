@@ -40,19 +40,20 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  // required values for enthalpy coupling
+  // The required values for pressure coupling
+  const VariableValue & _p_dot;
+  const VariableValue & _dp_dot;
+  const unsigned int _p_var_number;
+
+  // The required values for enthalpy coupling
   const VariableValue & _h_dot;
   const VariableValue & _dh_dot;
   const unsigned int _h_var_number;
 
-  // The first derivative of density wrt pressure
+  // Density derivatives wrt pressure and enthalpy
   const MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dp2;
   const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The second derivative of density wrt enthalpy and pressure
+  const MaterialProperty<Real> & _drho_dh2;
   const MaterialProperty<Real> & _drho_dph;
 };

@@ -41,13 +41,13 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   // required values for pressure and flowrate coupling
-  const VariableValue & _q;
+  const VariableValue & _m;
   const VariableValue & _p_dot;
-  const VariableValue & _q_dot;
+  const VariableValue & _m_dot;
   const VariableValue & _dp_dot;
-  const VariableValue & _dq_dot;
+  const VariableValue & _dm_dot;
   const unsigned int _p_var_number;
-  const unsigned int _q_var_number;
+  const unsigned int _m_var_number;
 
   // The area of pipe
   const MaterialProperty<Real> & _area;
@@ -58,22 +58,16 @@ protected:
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
   // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
+  const MaterialProperty<Real> & _drho_dp2;
   // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
+  const MaterialProperty<Real> & _drho_dh2;
   // The second derivative of density wrt enthalpy and pressure
   const MaterialProperty<Real> & _drho_dph;
 
   // The gamma first derivatives
-  const MaterialProperty<Real> & _dgamma_dh;
-  // The gamma first derivatives
   const MaterialProperty<Real> & _dgamma_dp;
   // The gamma first derivatives
-  const MaterialProperty<Real> & _dgamma_dq;
-  // The gamma second derivatives
-  const MaterialProperty<Real> & _dgamma2_dhq;
-  // The gamma second derivatives
-  const MaterialProperty<Real> & _dgamma2_dpq;
-  // The gamma second derivatives
-  const MaterialProperty<Real> & _dgamma2_dq2;
+  const MaterialProperty<Real> & _dgamma_dh;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dm;
 };

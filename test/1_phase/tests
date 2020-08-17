@@ -19,14 +19,24 @@
     input = 'transient.i'
     exodiff = 'transient_out.e'
   [../]
-  [./Lateral_Heat_Calculation_Uto]
+  [./Lateral_Heat_Ramey_Injection_Case]
     type = 'Exodiff'
-    input = 'Willhite.i'
-    exodiff = 'Willhite_out.e'
+    input = 'Ramey_1962.i'
+    exodiff = 'Ramey_1962_out.e'
   [../]
-  [./Ramey_Validation]
+  [./Lateral_Heat_Ramey_Production_Case]
     type = 'Exodiff'
-    input = 'Satman.i'
-    exodiff = 'Satman_out.e'
+    input = 'Satman_production.i'
+    exodiff = 'Satman_production_out.e'
+  [../]
+  [./Lateral_Heat_Annulus_Conductivity]
+    type = 'Exodiff'
+    input = 'willhite_annulus.i'
+    exodiff = 'willhite_annulus_out.e'
+  [../]
+  [./Coaxial_Check]
+    type = 'CSVDiff'
+    input = 'coaxial.i'
+    csvdiff = 'coaxial_out.csv'
   [../]
 []

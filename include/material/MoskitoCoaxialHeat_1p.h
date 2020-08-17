@@ -1,7 +1,7 @@
 /**************************************************************************/
 /*  MOSKITO - Multiphysics cOupled Simulator toolKIT for wellbOres        */
 /*                                                                        */
-/*  Copyright (C) 2017 by Maziar Gholami Korzani                          */
+/*  Copyright (C) 2019 by Maziar Gholami Korzani                          */
 /*  Karlsruhe Institute of Technology, Institute of Applied Geosciences   */
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
@@ -23,30 +23,51 @@
 
 #pragma once
 
-#include "TimeKernel.h"
+#include "Material.h"
+#include "MoskitoEOS1P.h"
+#include "MoskitoViscosity1P.h"
 
-class MoskitoTimeMomentum_2p1c;
+class MoskitoCoaxialHeat_1p;
 
 template <>
-InputParameters validParams<MoskitoTimeMomentum_2p1c>();
+InputParameters validParams<MoskitoCoaxialHeat_1p>();
 
-class MoskitoTimeMomentum_2p1c : public TimeKernel
+class MoskitoCoaxialHeat_1p : public Material
 {
 public:
-  MoskitoTimeMomentum_2p1c(const InputParameters & parameters);
+  MoskitoCoaxialHeat_1p(const InputParameters & parameters);
+  virtual void computeQpProperties() override;
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-  // The required values for massrate coupling
-  const VariableValue & _m_dot;
-  const VariableValue & _dm_dot;
-  const unsigned int _m_var_number;
-
-  // The sign of well flow direction
-  const MaterialProperty<Real> & _well_sign;
-  // The area of pipe
-  const MaterialProperty<Real> & _area;
+  // Userobject to equation of state
+  const MoskitoEOS1P & eos_uo;
+  // Userobject to Viscosity Eq
+  const MoskitoViscosity1P & viscosity_uo;
+  // overall heat transfer coeff
+  MaterialProperty<Real> & _ohc;
+  Real _rio;
+  Real _wt;
+  Real _roi;
+  Real _ki;
+  // The coupled temperature of inner pipe
+  const VariableValue & _T_i;
+  // The coupled flow rate of inner pipe
+  const VariableValue & _flow_i;
+  // The coupled pressure of inner pipe
+  const VariableValue & _p_i;
+  // The coupled temperature of outer pipe
+  const VariableValue & _T_o;
+  // The coupled flow rate of outer pipe
+  const VariableValue & _flow_o;
+  // The coupled pressure of outer pipe
+  const VariableValue & _p_o;
+  // Nusslet number inner pipe
+  MaterialProperty<Real> & _nusselt_i;
+  // Nusslet number outer pipe
+  MaterialProperty<Real> & _nusselt_o;
+  // function for calculating convective heat transfer coeff in the inner pipe
+  Real Conv_coeff_inner();
+  // function for calculating convective heat transfer coeff in the outer pipe
+  Real Conv_coeff_outer();
+  Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };

@@ -21,32 +21,48 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#pragma once
+#include "MoskitoLatHeatCoaxial_1p.h"
 
-#include "TimeKernel.h"
-
-class MoskitoTimeMomentum_2p1c;
+registerMooseObject("MoskitoApp", MoskitoLatHeatCoaxial_1p);
 
 template <>
-InputParameters validParams<MoskitoTimeMomentum_2p1c>();
-
-class MoskitoTimeMomentum_2p1c : public TimeKernel
+InputParameters
+validParams<MoskitoLatHeatCoaxial_1p>()
 {
-public:
-  MoskitoTimeMomentum_2p1c(const InputParameters & parameters);
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Heat exchange between inner and outer pipes");
+  params.addRequiredCoupledVar("Tsur", "temperature of other pipe");
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+MoskitoLatHeatCoaxial_1p::MoskitoLatHeatCoaxial_1p(const InputParameters & parameters)
+  : Kernel(parameters),
+  _Tsur(coupledValue("Tsur")),
+  _Tsur_var_number(coupled("Tsur")),
+  _area(getMaterialProperty<Real>("well_area")),
+  _ohc(getMaterialProperty<Real>("overall_heat_transfer_coeff"))
+  {
+  }
 
-  // The required values for massrate coupling
-  const VariableValue & _m_dot;
-  const VariableValue & _dm_dot;
-  const unsigned int _m_var_number;
+Real
+MoskitoLatHeatCoaxial_1p::computeQpResidual()
+{
+  return _test[_i][_qp] * _ohc[_qp] * 2.0 * PI * (_u[_qp] - _Tsur[_qp]) / _area[_qp];
+}
 
-  // The sign of well flow direction
-  const MaterialProperty<Real> & _well_sign;
-  // The area of pipe
-  const MaterialProperty<Real> & _area;
-};
+Real
+MoskitoLatHeatCoaxial_1p::computeQpJacobian()
+{
+  return _test[_i][_qp] * _ohc[_qp] * 2.0 * PI * _phi[_j][_qp] / _area[_qp];
+}
+
+Real
+MoskitoLatHeatCoaxial_1p::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  Real s = 0.0;
+  if (jvar == _Tsur_var_number)
+  {
+     s -= _test[_i][_qp] * _ohc[_qp] * 2.0 * PI * _phi[_j][_qp] / _area[_qp];
+  }
+  return s;
+}

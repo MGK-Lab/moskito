@@ -41,27 +41,23 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // The gradient of the coupled pressure
-  const VariableGradient & _grad_p;
-  // The gradient of the coupled specific enthalpy
-  const VariableGradient & _grad_h;
+  // The required values for massrate coupling
+  const VariableValue & _m;
+  const VariableGradient & _grad_m;
+  unsigned _m_var_number;
 
-  // Variable numberings
-  unsigned _p_var_number;
+  // The required values for enthalpy coupling
+  const VariableGradient & _grad_h;
   unsigned _h_var_number;
 
-  // The mixture density
+  // Density derivatives wrt pressure and enthalpy
   const MaterialProperty<Real> & _rho;
-  // The first derivative of mixture density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
-  // The first derivative of mixture density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dp2;
   const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The second derivative of density wrt enthalpy and pressure
+  const MaterialProperty<Real> & _drho_dh2;
   const MaterialProperty<Real> & _drho_dph;
+
   // The pipe Moody friction factor
   const MaterialProperty<Real> & _f;
   // The gravity acceleration as a vector
@@ -74,17 +70,9 @@ protected:
   const MaterialProperty<RealVectorValue> & _well_dir;
   // The flow direction
   const MaterialProperty<Real> & _well_sign;
-
-  // The gamma first derivatives
-  const MaterialProperty<Real> & _dgamma_dh;
-  // The gamma first derivatives
+  //
+  // // The gamma derivatives
   const MaterialProperty<Real> & _dgamma_dp;
-  // The gamma first derivatives
-  const MaterialProperty<Real> & _dgamma_dq;
-  // The gamma second derivatives
-  const MaterialProperty<Real> & _dgamma2_dhq;
-  // The gamma second derivatives
-  const MaterialProperty<Real> & _dgamma2_dpq;
-  // The gamma second derivatives
-  const MaterialProperty<Real> & _dgamma2_dq2;
+  const MaterialProperty<Real> & _dgamma_dh;
+  const MaterialProperty<Real> & _dgamma_dm;
 };

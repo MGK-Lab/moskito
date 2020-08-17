@@ -21,36 +21,34 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOMASSFLOWRATECOUPLED_H
-#define MOSKITOMASSFLOWRATECOUPLED_H
+#pragma once
 
-#include "NodalBC.h"
-#include "MoskitoEOS2P.h"
+#include "GeneralUserObject.h"
+#include "RankTwoTensor.h"
 
-class MoskitoMassFlowRateCoupled;
+class MoskitoSUPG;
 
 template <>
-InputParameters validParams<MoskitoMassFlowRateCoupled>();
+InputParameters validParams<MoskitoSUPG>();
 
-class MoskitoMassFlowRateCoupled : public NodalBC
+class MoskitoSUPG : public GeneralUserObject
 {
 public:
-  MoskitoMassFlowRateCoupled(const InputParameters & parameters);
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  MoskitoSUPG(const InputParameters & parameters);
+
+  virtual void execute();
+  virtual void initialize();
+  virtual void finalize();
+
+  void SUPGCalculator(const Real & diff, const Real & dt, const Elem * ele, const RealVectorValue & v, RealVectorValue & SUPG_coeff, Real & alpha, Real & CrNr) const;
+  Real tau(const Real & alpha, const Real & diff, const Real & dt, const Real & v, const Real & h) const;
 
 protected:
-  // Userobject to equation of state
-  const MoskitoEOS2P & eos_uo;
-  //Mass flow rate assigned by the user
-  const Real & _m_dot;
-  // Reading of coupled parameters
-  const VariableValue & _h;
-  const VariableValue & _p;
-  // The id of the coupled variable
-  unsigned int _h_var_number;
-  unsigned int _p_var_number;
+  Real Optimal(const Real & alpha) const;
+  Real Temporal(const Real & v, const Real & h, const Real & diff, const Real & dt) const;
+  Real DoublyAsymptotic(const Real & alpha) const;
+  Real Critical(const Real & alpha) const;
 
+  MooseEnum _method;
+  enum M {optimal, doubly_asymptotic, critical, transient_brooks, transient_tezduyar};
 };
-
-#endif // MOSKITOMASSFLOWRATE_H

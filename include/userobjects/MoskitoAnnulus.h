@@ -23,30 +23,46 @@
 
 #pragma once
 
-#include "TimeKernel.h"
+#include "GeneralUserObject.h"
 
-class MoskitoTimeMomentum_2p1c;
+class MoskitoAnnulus;
 
 template <>
-InputParameters validParams<MoskitoTimeMomentum_2p1c>();
+InputParameters validParams<MoskitoAnnulus>();
 
-class MoskitoTimeMomentum_2p1c : public TimeKernel
+class MoskitoAnnulus : public GeneralUserObject
 {
 public:
-  MoskitoTimeMomentum_2p1c(const InputParameters & parameters);
+  MoskitoAnnulus(const InputParameters & parameters);
+
+  virtual void execute();
+  virtual void initialize();
+  virtual void finalize();
+
+  Real RadiativeHTCoefficient(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real ConvectiveHTCoefficient(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real SurfaceTemperature(const Real & T0, const Real & fac, const Real & deltaT) const;
+  void CheckValidity(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  Real GrashofNo(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real RayleighNo(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
+  Real NusseltNo(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
 
-  // The required values for massrate coupling
-  const VariableValue & _m_dot;
-  const VariableValue & _dm_dot;
-  const unsigned int _m_var_number;
+  const Real & _eo;
+  const Real & _ei;
+  const Real & _mu;
+  const Real & _lambda;
+  const Real & _cp;
+  const Real & _beta;
+  const Real & _rho;
+  const Real & _g;
+  MooseEnum _hc_method;
+  enum HC_Cases {Dropkin_Sommerscales, Raithby_Hollands, Churchill};
 
-  // The sign of well flow direction
-  const MaterialProperty<Real> & _well_sign;
-  // The area of pipe
-  const MaterialProperty<Real> & _area;
+
+  Real _Pr;
+  Real _alpha;;
+  const Real _Boltz = 5.670374419e-8;
+
 };

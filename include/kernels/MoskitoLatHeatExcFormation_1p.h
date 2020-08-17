@@ -6,6 +6,7 @@
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
 /*  This file is part of MOSKITO App                                      */
+/*  Co-developed by Sebastian Held                                        */
 /*                                                                        */
 /*  This program is free software: you can redistribute it and/or modify  */
 /*  it under the terms of the GNU General Public License as published by  */
@@ -21,35 +22,33 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoMassFlowRate.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoMassFlowRate);
+#include "Kernel.h"
+
+class MoskitoLatHeatExcFormation_1p;
 
 template <>
-InputParameters
-validParams<MoskitoMassFlowRate>()
-{
-  InputParameters params = validParams<NodalBC>();
-  params.addRequiredParam<Real>("mass_flowrate",
-        "The mass flowrate of the mixture (kg/s)");
-  params.declareControllable("mass_flowrate");
-  params.addRequiredParam<Real>("mixture_density",
-        "The density of mixture (kg/m^3)");
-  params.declareControllable("mixture_density");
-  params.addClassDescription("Implements a NodalBC (Dirichlet) which calculates"
-                            " mass weighted flow rate for momentum eq");
-  return params;
-}
+InputParameters validParams<MoskitoLatHeatExcFormation_1p>();
 
-MoskitoMassFlowRate::MoskitoMassFlowRate(const InputParameters & parameters)
-  : NodalBC(parameters),
-    _m_dot(getParam<Real>("mass_flowrate")),
-    _rho_m(getParam<Real>("mixture_density"))
+class MoskitoLatHeatExcFormation_1p : public Kernel
 {
-}
+public:
+  MoskitoLatHeatExcFormation_1p(const InputParameters & parameters);
 
-Real
-MoskitoMassFlowRate::computeQpResidual()
-{
-  return _u[_qp] - (_m_dot / _rho_m);
-}
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+
+  // Radius tubing outer
+  const MaterialProperty<Real> & _rto;
+  // Thermal wellbore resistivity
+  const MaterialProperty<Real> & _Uto;
+  // Formation temperature at the formation-casing interface
+  const VariableValue & _Twf;
+  unsigned _Twf_var_number;
+  // Diameter filled with liquid = _rti
+  const MaterialProperty<Real> & _area;
+  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
+};

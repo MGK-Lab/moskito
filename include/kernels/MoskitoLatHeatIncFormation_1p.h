@@ -6,6 +6,7 @@
 /*  Division of Geothermal Research                                       */
 /*                                                                        */
 /*  This file is part of MOSKITO App                                      */
+/*  Co-developed by Sebastian Held                                        */
 /*                                                                        */
 /*  This program is free software: you can redistribute it and/or modify  */
 /*  it under the terms of the GNU General Public License as published by  */
@@ -21,26 +22,28 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOMASSFLOWRATE_H
-#define MOSKITOMASSFLOWRATE_H
+#pragma once
 
-#include "NodalBC.h"
+#include "Kernel.h"
 
-class MoskitoMassFlowRate;
+class MoskitoLatHeatIncFormation_1p;
 
 template <>
-InputParameters validParams<MoskitoMassFlowRate>();
+InputParameters validParams<MoskitoLatHeatIncFormation_1p>();
 
-class MoskitoMassFlowRate : public NodalBC
+class MoskitoLatHeatIncFormation_1p : public Kernel
 {
 public:
-  MoskitoMassFlowRate(const InputParameters & parameters);
+  MoskitoLatHeatIncFormation_1p(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
-  const Real & _m_dot;
-  const Real & _rho_m;
+  // Thermal wellbore resistivity
+  const MaterialProperty<Real> & _lambda;
+  // formation Temperature
+  const MaterialProperty<Real> & _Tform;
+  const MaterialProperty<Real> & _area;
+  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
-
-#endif // MOSKITOMASSFLOWRATE_H

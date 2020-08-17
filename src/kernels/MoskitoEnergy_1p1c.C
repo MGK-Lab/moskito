@@ -33,8 +33,10 @@ validParams<MoskitoEnergy_1p1c>()
 
   params.addRequiredCoupledVar("flowrate", "Volumetric flowrate nonlinear variable");
   params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable");
-  params.addClassDescription("Energy conservation equation for 1 phase (either liquid or"
-                                      " gas) pipe flow and it returns enthalpy");
+  params.addParam<bool>("gravity_energy", false, "Consider potential energy "
+          "caused by gravity acceleration");
+  params.addClassDescription("Energy conservation equation for 1 phase (either "
+          "liquid or gas) pipe flow and it returns enthalpy");
 
   return params;
 }
@@ -54,8 +56,13 @@ MoskitoEnergy_1p1c::MoskitoEnergy_1p1c(const InputParameters & parameters)
   _drho_dp(getMaterialProperty<Real>("drho_dp")),
   _drho_dT(getMaterialProperty<Real>("drho_dT")),
   _h(getMaterialProperty<Real>("h_from_p_T")),
+  _add_g(getParam<bool>("gravity_energy")),
   _gravity(getMaterialProperty<RealVectorValue>("gravity"))
 {
+  if(_add_g)
+    _gfac = 1.0;
+  else
+    _gfac = 0.0;
 }
 
 Real
@@ -68,7 +75,7 @@ MoskitoEnergy_1p1c::computeQpResidual()
   r += _drho_dp[_qp] * _grad_p[_qp] + _drho_dT[_qp] * _grad_u[_qp];
   r *= _q[_qp] * (_h[_qp] + _q[_qp] * _q[_qp] / 2.0 / _area[_qp] / _area[_qp]);
   r += _grad_q[_qp] * _rho[_qp] * (_h[_qp] + 1.5 * _q[_qp] * _q[_qp] / _area[_qp] / _area[_qp]);
-  r += _rho[_qp] * _q[_qp] * (_cp[_qp] * _grad_u[_qp] - _gravity[_qp]);
+  r += _rho[_qp] * _q[_qp] * (_cp[_qp] * _grad_u[_qp] - _gfac * _gravity[_qp]);
   r *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
 
   return r * _well_dir[_qp];
@@ -84,7 +91,7 @@ MoskitoEnergy_1p1c::computeQpJacobian()
   j += (_drho_dp[_qp] * _grad_p[_qp] + _drho_dT[_qp] * _grad_u[_qp]) * _q[_qp] * _cp[_qp] * _phi[_j][_qp];
   j += _grad_q[_qp] * _drho_dT[_qp] * _phi[_j][_qp] * (_h[_qp] + 1.5 * _q[_qp] * _q[_qp] / _area[_qp] / _area[_qp]);
   j += _grad_q[_qp] * _rho[_qp] * _cp[_qp] * _phi[_j][_qp];
-  j += _drho_dT[_qp] * _phi[_j][_qp] * _q[_qp] * (_cp[_qp] * _grad_u[_qp] - _gravity[_qp]);
+  j += _drho_dT[_qp] * _phi[_j][_qp] * _q[_qp] * (_cp[_qp] * _grad_u[_qp] - _gfac * _gravity[_qp]);
   j += _rho[_qp] * _q[_qp] * _cp[_qp] * _grad_phi[_j][_qp];
   j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
 
@@ -102,7 +109,7 @@ MoskitoEnergy_1p1c::computeQpOffDiagJacobian(unsigned int jvar)
     j *= _phi[_j][_qp] * _h[_qp] + 1.5 * _phi[_j][_qp] * _q[_qp] * _q[_qp] / _area[_qp] / _area[_qp];
     j += _grad_phi[_j][_qp] * _rho[_qp] * (_h[_qp] + 1.5 * _q[_qp] * _q[_qp] / _area[_qp] / _area[_qp]);
     j += _grad_q[_qp] * _rho[_qp] * 3.0 * _phi[_j][_qp] * _q[_qp] / _area[_qp] / _area[_qp];
-    j += _rho[_qp] * _phi[_j][_qp] * (_cp[_qp] * _grad_u[_qp] - _gravity[_qp]);
+    j += _rho[_qp] * _phi[_j][_qp] * (_cp[_qp] * _grad_u[_qp] - _gfac * _gravity[_qp]);
     j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
   }
 
@@ -111,7 +118,7 @@ MoskitoEnergy_1p1c::computeQpOffDiagJacobian(unsigned int jvar)
     j += _drho_dp[_qp] * _grad_phi[_j][_qp];
     j *= _q[_qp] * (_h[_qp] + _q[_qp] * _q[_qp] / 2.0 / _area[_qp] / _area[_qp]);
     j += _grad_q[_qp] * _drho_dp[_qp] * _phi[_j][_qp] * (_h[_qp] + 1.5 * _q[_qp] * _q[_qp] / _area[_qp] / _area[_qp]);
-    j += _drho_dp[_qp] * _phi[_j][_qp] * _q[_qp] * (_cp[_qp] * _grad_u[_qp] - _gravity[_qp]);
+    j += _drho_dp[_qp] * _phi[_j][_qp] * _q[_qp] * (_cp[_qp] * _grad_u[_qp] - _gfac * _gravity[_qp]);
     j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
   }
 

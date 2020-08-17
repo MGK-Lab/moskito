@@ -51,7 +51,7 @@ MoskitoEOS1P_Brine::MoskitoEOS1P_Brine(const InputParameters & parameters)
 Real
 MoskitoEOS1P_Brine::rho_from_p_T(const Real & pressure, const Real & temperature) const
 {
-  if (pressure <0.0 || pressure > 5e7 || temperature <273.15)
+  if (pressure <0.0 || temperature <273.15)
     mooseError("The pressure or temperature is out of the range.");
   Real _a = -9.9559*std::exp(-4.539e-3*_m) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
   return (-3.033405 + 10.128163*_a - 8.750567*_a*_a + 2.663107*_a*_a*_a)*1.0e3;

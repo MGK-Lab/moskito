@@ -7,9 +7,19 @@
   nx = 50
 []
 
+[Modules]
+  [./FluidProperties]
+    [./water_uo]
+      type = Water97FluidProperties
+      execute_on = TIMESTEP_BEGIN
+    [../]
+  [../]
+[]
+
 [UserObjects]
   [./eos]
-    type = MoskitoEOS1P_IdealFluid
+    type = MoskitoEOS1P_FPModule
+    SinglePhase_fp = water_uo
   [../]
   [./viscosity]
     type = MoskitoViscosityWaterSmith
@@ -67,7 +77,7 @@
     boundary = left
     function = 'if(t>20,0.01,0.00001)'
   [../]
-[../]
+[]
 
 [Kernels]
   [./Tkernel]
@@ -75,6 +85,7 @@
     variable = T
     pressure = p
     flowrate = q
+    gravity_energy = true
   [../]
   [./Ttimekernel]
     type = MoskitoTimeEnergy_1p1c
