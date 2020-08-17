@@ -77,7 +77,7 @@
     boundary = left
     function = 'if(t>20,0.01,0.00001)'
   [../]
-[../]
+[]
 
 [Kernels]
   [./Tkernel]

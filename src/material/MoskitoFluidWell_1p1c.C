@@ -83,23 +83,19 @@ MoskitoFluidWell_1p1c::computeQpProperties()
 Real
 MoskitoFluidWell_1p1c::Conv_coeff()
 {
-  Real pr_b, nusselt, gama;
+  Real pr_b, nusselt = 0.0, gamma;
   if (_Re[_qp]>0.0)
   {
-     pr_b = _vis[_qp] * _cp[_qp] / _lambda[_qp];
-     if (_Re[_qp]<2300.0)
-     {
-         nusselt = 4.364 ;
-     }
-     if (2300.0<_Re[_qp]<10000.0)
-     {
-         gama = (_Re[_qp] - 2300.0)/(10000.0 - 2300.0);
-         nusselt = (1.0 - gama) * 4.364 + gama * 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
-     }
-     if (10000.0<_Re[_qp])
-     {
-         nusselt = 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
-     }
+    pr_b = _vis[_qp] * _cp[_qp] / _lambda[_qp];
+    if (_Re[_qp]<2300.0)
+      nusselt = 4.364 ;
+    else if (_Re[_qp]<10000.0)
+    {
+      gamma = (_Re[_qp] - 2300.0)/(10000.0 - 2300.0);
+      nusselt = (1.0 - gamma) * 4.364 + gamma * 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
+    }
+    else
+      nusselt = 0.023 * pow(_Re[_qp], 0.8) * pow(pr_b, 0.3);
   }
 
   return nusselt * _lambda[_qp] / _H_dia[_qp];
