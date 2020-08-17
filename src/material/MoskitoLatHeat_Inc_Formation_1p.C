@@ -110,7 +110,7 @@ MoskitoLatHeat_Inc_Formation_1p::MoskitoLatHeat_Inc_Formation_1p(const InputPara
   if (parameters.isParamSetByUser("annulus_uo")*_annulus_ind)
     _annulus_uo = &getUserObject<MoskitoAnnulus>("annulus_uo");
   else if (_annulus_ind || parameters.isParamSetByUser("annulus_uo"))
-    mooseError(name(),"Either annulus_uo or zero conductivity is not provided to model annulus.\n");
+    mooseError(name()," Either annulus_uo or zero conductivity is not provided to model annulus.\n");
   else
     _annulus_uo = NULL;
 
@@ -209,7 +209,7 @@ MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
 Real
 MoskitoLatHeat_Inc_Formation_1p::computeReferenceResidual(const Real trial_value, const Real scalar)
 {
-  return 1e-2;
+  return ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf) - scalar;
 }
 
 Real
@@ -220,27 +220,21 @@ MoskitoLatHeat_Inc_Formation_1p::computeResidual(const Real trial_value, const R
   // to add up other commponents
   Uto = 1.0 / ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf);
 
-  if (_annulus_ind)
-  {
-    Real Twf = TemperatureWFinterface(scalar);
-    Real Ri = -1.0 / ResistivityNoAnnulus(0, _annulus_loc, _add_hf) * scalar;
-    Real Ro = 1.0 / ResistivityNoAnnulus(_annulus_loc+1, _lambda_vec.size(), false) * scalar;
-    Real Ti = _annulus_uo->SurfaceTemperature(_Tf[_qp], Ri, _Tf[_qp]-Twf);
-    Real To = _annulus_uo->SurfaceTemperature(Twf, Ro, _Tf[_qp]-Twf);
-    Real hr = _annulus_uo->RadiativeHTCoefficient(_rai, _rao, Ti, To);
-    Real hc = _annulus_uo->ConvectiveHTCoefficient(_rai, _rao, Ti, To);
-    std::cout<<Twf<<std::endl;
-    std::cout<<Ri<<std::endl;
-    std::cout<<Ro<<std::endl;
-    std::cout<<Ti<<std::endl;
-    std::cout<<To<<std::endl;
-    std::cout<<hr<<std::endl;
-    std::cout<<hc<<std::endl;
-    abort();
-    Uto += _Rwf / (_rai * (hc + hr));
-  }
+  Real Twf = TemperatureWFinterface(scalar);
+  Real Ri = -1.0 / ResistivityNoAnnulus(0, _annulus_loc, _add_hf) * scalar;
+  Real Ro = 1.0 / ResistivityNoAnnulus(_annulus_loc+1, _lambda_vec.size(), false) * scalar;
+  Real Ti = _annulus_uo->SurfaceTemperature(_Tf[_qp], Ri, _Tf[_qp]-Twf);
+  Real To = _annulus_uo->SurfaceTemperature(Twf, Ro, _Tf[_qp]-Twf);
+  Real hr = _annulus_uo->RadiativeHTCoefficient(_rai, _rao, Ti, To);
+  Real hc = _annulus_uo->ConvectiveHTCoefficient(_rai, _rao, Ti, To);
+
+  if (hc!=0.0 || hr!=0.0)
+    Uto += _Rto / (_rai * (hc + hr));
 
   Uto = 1.0 / Uto;
+
+  if(std::abs((scalar-Uto)/Uto)<1e-3)
+    _annulus_uo->CheckValidity(_rai, _rao, Ti, To);
 
   return Uto - scalar;
 }
@@ -260,5 +254,5 @@ MoskitoLatHeat_Inc_Formation_1p::computeDerivative(const Real trial_value, const
 Real
 MoskitoLatHeat_Inc_Formation_1p::initialGuess(const Real trial_value)
 {
-  return ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf);
+  return 0.9*ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf);
 }

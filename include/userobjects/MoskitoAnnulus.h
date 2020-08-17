@@ -42,6 +42,7 @@ public:
   Real RadiativeHTCoefficient(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
   Real ConvectiveHTCoefficient(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
   Real SurfaceTemperature(const Real & T0, const Real & fac, const Real & deltaT) const;
+  void CheckValidity(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;
 
 protected:
   Real GrashofNo(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const;

@@ -29,6 +29,11 @@
     input = 'Satman_production.i'
     exodiff = 'Satman_production_out.e'
   [../]
+  [./Lateral_Heat_Annulus_Conductivity]
+    type = 'Exodiff'
+    input = 'willhite_annulus.i'
+    exodiff = 'willhite_annulus_out.e'
+  [../]
   [./Coaxial_Check]
     type = 'CSVDiff'
     input = 'coaxial.i'

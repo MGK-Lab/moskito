@@ -1,4 +1,5 @@
-# Validation of Heat exchange using the Paper from Satman & Tureyen 2016
+# Validation of Heat exchange using the paper from Satman & Tureyen 2016
+# Actually ramey analytical solution
 [Mesh]
   type = GeneratedMesh
   dim = 1

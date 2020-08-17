@@ -126,37 +126,37 @@ MoskitoAnnulus::ConvectiveHTCoefficient(const Real & ri, const Real & ro, const 
 
   switch (_hc_method)
   {
-  case HC_Cases::Dropkin_Sommerscales:
-  {
-    Real Gr = GrashofNo(ri, ro, Ti, To);
-    if(Gr*_Pr>5e4 && Gr*_Pr<=7.2e8)
-      khc = 0.049 * std::pow(Gr*_Pr, 0.333) * std::pow(_Pr,0.074) * _lambda;
-    else
-      mooseError(name(), " Raithby&Hollands method is not valid because either ",
-                "Pr_No = ", _Pr, "or Gr_No = ", Gr, "are not in the validity",
-                " range => 0.7<=Pr_No<=6000, Ra_No<1e7");
+    case HC_Cases::Dropkin_Sommerscales:
+    {
+      Real Gr = GrashofNo(ri, ro, Ti, To);
+      // if(Gr*_Pr>=5e4 && Gr*_Pr<=7.2e8)
+        khc = 0.049 * std::pow(Gr*_Pr, 0.333) * std::pow(_Pr,0.074) * _lambda;
+      // else
+      //   mooseError(name(), " Dropkin_Sommerscales method is not valid because ",
+      //             "Pr_No = ", _Pr, " and Gr_No = ", Gr, "are not in the validity",
+      //             " range => 5e4<=Pr_No*Gr_No<=7.2e8, Ra_No<1e7");
 
-    hc = khc / (ri * std::log(ro / ri));
-  }
-  break;
+      hc = khc / (ri * std::log(ro / ri));
+    }
+    break;
 
-  case HC_Cases::Raithby_Hollands:
-  {
-    Real Ra = RayleighNo(ri, ro, Ti, To);
-    if(_Pr>=0.7 && _Pr<=6000 && Ra<1e7)
-      khc = 0.384 * std::pow(_Pr*Ra/(0.861 + _Pr),0.25) * _lambda;
-    else
-      mooseError(name(), " Raithby&Hollands method is not valid because either ",
-                "Pr_No = ", _Pr, "or Ra_No = ", Ra, "are not in the validity",
-                " range => 0.7<=Pr_No<=6000, Ra_No<1e7");
+    case HC_Cases::Raithby_Hollands:
+    {
+      Real Ra = RayleighNo(ri, ro, Ti, To);
+      // if(_Pr>=0.7 && _Pr<=6000 && Ra<1e7)
+        khc = 0.384 * std::pow(_Pr*Ra/(0.861 + _Pr),0.25) * _lambda;
+      // else
+      //   mooseError(name(), " Raithby&Hollands method is not valid because either ",
+      //             "Pr_No = ", _Pr, "or Ra_No = ", Ra, "are not in the validity",
+      //             " range => 0.7<=Pr_No<=6000, Ra_No<1e7");
 
-    hc = khc / (ri * std::log(ro / ri));
-  }
-  break;
+      hc = khc / (ri * std::log(ro / ri));
+    }
+    break;
 
-  case HC_Cases::Churchill:
-    hc = NusseltNo(ri, ro, Ti, To) * _lambda / (2.0 * ro);
-  break;
+    case HC_Cases::Churchill:
+      hc = NusseltNo(ri, ro, Ti, To) * _lambda / (2.0 * ro);
+    break;
   }
 
   return hc;
@@ -166,4 +166,31 @@ Real
 MoskitoAnnulus::SurfaceTemperature(const Real & T0, const Real & fac, const Real & deltaT) const
 {
   return T0 + fac * deltaT;
+}
+
+
+void
+MoskitoAnnulus::CheckValidity(const Real & ri, const Real & ro, const Real & Ti, const Real & To) const
+{
+  switch (_hc_method)
+  {
+    case HC_Cases::Dropkin_Sommerscales:
+    {
+      Real Gr = GrashofNo(ri, ro, Ti, To);
+      if(!(Gr*_Pr>=5e4 && Gr*_Pr<=7.2e8))
+        mooseError(name(), ": Dropkin_Sommerscales method is not valid because ",
+                  "Pr_No = ", _Pr, " and Gr_No = ", Gr, " are not in the validity",
+                  " range => 5e4<=Pr_No*Gr_No<=7.2e8, Ra_No<1e7");
+    }
+    break;
+
+    case HC_Cases::Raithby_Hollands:
+    {
+      Real Ra = RayleighNo(ri, ro, Ti, To);
+      if (!(_Pr>=0.7 && _Pr<=6000 && Ra<1e7))
+        mooseError(name(), ": Raithby&Hollands method is not valid because either ",
+                  "Pr_No = ", _Pr, " or Ra_No = ", Ra, " are not in the validity",
+                  " range => 0.7<=Pr_No<=6000, Ra_No<1e7");
+    }
+  }
 }
