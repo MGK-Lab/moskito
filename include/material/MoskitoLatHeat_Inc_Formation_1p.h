@@ -68,6 +68,7 @@ protected:
 
   // Tolerance of finite difference derivation
   const Real _tol;
+  
   // outer diamters of well complition
   std::vector<Real> _OD_vec;
   // conductivities vector

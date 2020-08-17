@@ -172,7 +172,6 @@ MoskitoLatHeat_Inc_Formation_1p::TemperatureWFinterface(const Real & Uto)
   return Twf;
 }
 
-
 Real
 MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
 {

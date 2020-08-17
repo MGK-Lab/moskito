@@ -88,15 +88,14 @@ MoskitoLatHeat_Exc_Formation_1p::MoskitoLatHeat_Exc_Formation_1p(const InputPara
     }
 
   if (parameters.isParamSetByUser("annulus_uo")*_annulus_ind)
-    _annulus_uo = &getUserObject<MoskitoSUPG>("annulus_uo");
+    _annulus_uo = &getUserObject<MoskitoAnnulus>("annulus_uo");
   else if (_annulus_ind || parameters.isParamSetByUser("annulus_uo"))
-    mooseError(name(),"Either annulus_uo or zero conductivity is not provided to model annulus.\n");
+    mooseError(name()," Either annulus_uo or zero conductivity is not provided to model annulus.\n");
   else
     _annulus_uo = NULL;
 
   _hf = _add_hf ? &getMaterialProperty<Real>("convective_heat_factor") : NULL;
 }
-
 
 void
 MoskitoLatHeat_Exc_Formation_1p::computeQpProperties()
@@ -105,61 +104,57 @@ MoskitoLatHeat_Exc_Formation_1p::computeQpProperties()
     mooseError(name(),"The diameter provided in fluid flow material did not ",
               "match with the first tubing inner diameter provided here.\n");
 
-  _Uto[_qp] = 0.0;
   _Rto[_qp] = _OD_vec[1] / 2.0;
 
   if (_annulus_ind)
-  {
-    Real trial = 0.0;
-    // returnNewtonSolve(_Uto[_qp], _Uto[_qp], _console);
-    // _Twb[_qp] = TemperatureWBinterface(_Uto[_qp],  _T[_qp]);
-  }
+    returnNewtonSolve(_Uto[_qp], _Uto[_qp], _console);
   else
-  {
-    for (int i = 0; i < _lambda_vec.size(); ++i)
-      if (_lambda_vec[i] != 0.0)
-        _Uto[_qp] += std::log(_OD_vec[i+1] / _OD_vec[i]) / _lambda_vec[i];
-    if (_add_hf && _Re[_qp]>0.0)
-      _Uto[_qp] += 1.0 / (_OD_vec[0] * 0.5 * (*_hf)[_qp]);
-    _Uto[_qp] *= _Rto[_qp];
-    _Uto[_qp] = 1.0 / _Uto[_qp];
-  }
+    _Uto[_qp] = ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf);
+}
+
+Real
+MoskitoLatHeat_Exc_Formation_1p::ResistivityNoAnnulus(const int & begin, const int & end, const bool & hf)
+{
+  Real Uto = 0.0;
+  for (int i = begin; i < end; ++i)
+    if (_lambda_vec[i] != 0.0)
+      Uto += std::log(_OD_vec[i+1] / _OD_vec[i]) / _lambda_vec[i];
+  if (hf && _Re[_qp]>0.0)
+    Uto += 1.0 / (_OD_vec[0] * 0.5 * (*_hf)[_qp]);
+  Uto *= _Rto[_qp];
+  Uto = 1.0 / Uto;
+
+  return Uto;
 }
 
 Real
 MoskitoLatHeat_Exc_Formation_1p::computeReferenceResidual(const Real trail_value, const Real scalar)
 {
-  return 1e-2;
+  return ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf) - scalar;
 }
 
 Real
 MoskitoLatHeat_Exc_Formation_1p::computeResidual(const Real trail_value, const Real scalar)
 {
-  // Auxillary variable
-  Real Aux, Uto;
-  // Calculation of thermal wellbore resistivity
-  Aux = 0.0;
-  // for (int i = 1; i < _OD_vec.size();++i)
-  // {
-  //   if (_lambda_vec[i-1] != 0.0)
-  //     Aux += std::log(_OD_vec[i] / _OD_vec[i-1]) / _lambda_vec[i-1];
-  // }
-  //
-  // if (_rai != 0.0)
-  // {
-  //   Real hr;
-  //   hr =  RadialHeatTransferCoefficient(scalar, _T[_qp]);
-  //   Real hc, grav;
-  //   grav = _gravity[_qp] * _well_dir[_qp];
-  //
-  //   if (grav == 0.0)
-  //     grav = _independ_gravity * _well_dir[_qp];
-  //
-  //   hc = ConvectiveHeatTransferCoefficient(scalar, _T[_qp], grav);
-  //   Aux += 1.0 / (_rai * (hc + hr));
-  // }
+  Real Uto = 0.0;
+  // calculating all resisitivity except annulus; made it inverse to be able
+  // to add up other commponents
+  Uto = 1.0 / ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf);
 
-  Uto = 1.0 / (Aux * (_OD_vec[1] / 2.0));
+  Real Ri = -1.0 / ResistivityNoAnnulus(0, _annulus_loc, _add_hf) * scalar;
+  Real Ro = 1.0 / ResistivityNoAnnulus(_annulus_loc+1, _lambda_vec.size(), false) * scalar;
+  Real Ti = _annulus_uo->SurfaceTemperature(_Tf[_qp], Ri, _Tf[_qp]-_Twf[_qp]);
+  Real To = _annulus_uo->SurfaceTemperature(_Twf[_qp], Ro, _Tf[_qp]-_Twf[_qp]);
+  Real hr = _annulus_uo->RadiativeHTCoefficient(_rai, _rao, Ti, To);
+  Real hc = _annulus_uo->ConvectiveHTCoefficient(_rai, _rao, Ti, To);
+
+  if (hc!=0.0 || hr!=0.0)
+    Uto += _Rto[_qp] / (_rai * (hc + hr));
+
+  Uto = 1.0 / Uto;
+
+  if(std::abs((scalar-Uto)/Uto)<1e-3)
+    _annulus_uo->CheckValidity(_rai, _rao, Ti, To);
 
   return Uto - scalar;
 }
@@ -179,10 +174,5 @@ MoskitoLatHeat_Exc_Formation_1p::computeDerivative(const Real trail_value, const
 Real
 MoskitoLatHeat_Exc_Formation_1p::initialGuess(const Real trial_value)
 {
-  Real ini_guess;
-  if (trial_value == 0.0)
-    ini_guess = 22.99696519;
-  else
-    ini_guess = trial_value;
-  return ini_guess;
+  return 0.9*ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf);
 }

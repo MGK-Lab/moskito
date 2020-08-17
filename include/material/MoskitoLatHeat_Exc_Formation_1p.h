@@ -25,7 +25,7 @@
 #pragma once
 
 #include "Material.h"
-#include "MoskitoSUPG.h"
+#include "MoskitoAnnulus.h"
 #include "NewtonIteration.h"
 
 class MoskitoLatHeat_Exc_Formation_1p;
@@ -39,17 +39,19 @@ public:
   MoskitoLatHeat_Exc_Formation_1p(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
-  virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
-  virtual Real computeResidual(const Real trail_value, const Real scalar) override;
-  virtual Real computeDerivative(const Real trail_value, const Real scalar) override;
-  virtual Real initialGuess(const Real trail_value) override;
-  virtual Real minimumPermissibleValue(const Real trail_value) const override
+  Real ResistivityNoAnnulus(const int & begin, const int & end, const bool & hf);
+
+  virtual Real computeReferenceResidual(const Real trial_value, const Real scalar) override;
+  virtual Real computeResidual(const Real trial_value, const Real scalar) override;
+  virtual Real computeDerivative(const Real trial_value, const Real scalar) override;
+  virtual Real initialGuess(const Real trial_value) override;
+  virtual Real minimumPermissibleValue(const Real trial_value) const override
   {
-    return 0.000000001;
+    return 1.0e-6;
   }
-  virtual Real maximumPermissibleValue(const Real trail_value) const override
+  virtual Real maximumPermissibleValue(const Real trial_value) const override
   {
-    return 100000.0;
+    return 1.0e+6;
   }
 
 protected:
@@ -83,6 +85,5 @@ protected:
   Real _rai = 0.0, _rao = 0.0;
   unsigned int _annulus_loc = 0;
   bool _annulus_ind = false;
-
-  const MoskitoSUPG * _annulus_uo;
+  const MoskitoAnnulus * _annulus_uo;
 };
