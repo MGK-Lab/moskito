@@ -67,7 +67,7 @@ MoskitoEOS1P_IdealGas::rho_from_p_T(const Real & molality, const Real & pressure
 }
 
 Real
-MoskitoEOS1P_IdealGas::cp(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_IdealGas::cp(const Real & molality, const Real & pressure, const Real & temperature) const
 {
   return _cp;
 }

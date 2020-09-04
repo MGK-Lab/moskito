@@ -30,8 +30,6 @@ InputParameters
 validParams<MoskitoEOS1P_Brine>()
 {
   InputParameters params = validParams<MoskitoEOS1P>();
-  params.addParam<Real>("specific_heat", 4200,
-        "Constant specific heat at constant pressure (J/kg.K)");
   params.addParam<Real>("thermal_conductivity", 0.6,
         "Constant thermal conductivity (W/m/K)");
 
@@ -40,7 +38,6 @@ validParams<MoskitoEOS1P_Brine>()
 
 MoskitoEOS1P_Brine::MoskitoEOS1P_Brine(const InputParameters & parameters)
   : MoskitoEOS1P(parameters),
-    _cp(getParam<Real>("specific_heat")),
     _lambda(getParam<Real>("thermal_conductivity"))
 {
 }
@@ -65,9 +62,10 @@ MoskitoEOS1P_Brine::rho_from_p_T(const Real & molality, const Real & pressure, c
 }
 
 Real
-MoskitoEOS1P_Brine::cp(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_Brine::cp(const Real & molality, const Real & pressure, const Real & temperature) const
 {
-  return _cp;
+  Real mass_fraction = 58.443e-3 * molality / (1.0 + 58.443e-3 * molality);
+  return mass_fraction * 880 + (1.0 - mass_fraction) * 4190.0;
 }
 
 Real

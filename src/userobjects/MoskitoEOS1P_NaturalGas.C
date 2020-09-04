@@ -82,7 +82,7 @@ MoskitoEOS1P_NaturalGas::rho_from_p_T(const Real & molality, const Real & pressu
 }
 
 Real
-MoskitoEOS1P_NaturalGas::cp(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_NaturalGas::cp(const Real & molality, const Real & pressure, const Real & temperature) const
 {
   return _cp;
 }

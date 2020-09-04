@@ -49,7 +49,7 @@ MoskitoEOS1P::MoskitoEOS1P(const InputParameters & parameters)
 MoskitoEOS1P::~MoskitoEOS1P() {}
 
 Real
-MoskitoEOS1P::h_from_p_T(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P::h_from_p_T(const Real & molality, const Real & pressure, const Real & temperature) const
 {
   if (temperature < _T_ref)
     mooseError(name(), ": Temperature should not be less than the reference temperature");
@@ -57,16 +57,16 @@ MoskitoEOS1P::h_from_p_T(const Real & pressure, const Real & temperature) const
   Real h = 0.0;
 
   if (_cp_linear)
-    h += 0.5 * (cp(pressure, temperature) + cp(pressure, _T_ref)) * (temperature - _T_ref);
+    h += 0.5 * (cp(molality, pressure, temperature) + cp(molality, pressure, _T_ref)) * (temperature - _T_ref);
   else
   {
     Real n = std::ceil((temperature - _T_ref) / _deltaT);
     Real dT = (temperature - _T_ref) / n;
 
     for(int i=1;i<n;i++)
-      h += cp(pressure, _T_ref + i * dT);
+      h += cp(molality, pressure, _T_ref + i * dT);
 
-    h += 0.5 * (cp(pressure, _T_ref) + cp(pressure, temperature));
+    h += 0.5 * (cp(molality, pressure, _T_ref) + cp(molality, pressure, temperature));
     h *= dT;
   }
 

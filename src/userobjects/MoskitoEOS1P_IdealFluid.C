@@ -83,7 +83,7 @@ MoskitoEOS1P_IdealFluid::rho_from_p_T(const Real & molality, const Real & pressu
 }
 
 Real
-MoskitoEOS1P_IdealFluid::cp(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_IdealFluid::cp(const Real & molality, const Real & pressure, const Real & temperature) const
 {
   return _cp;
 }

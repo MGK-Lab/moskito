@@ -99,7 +99,7 @@ MoskitoCoaxialHeat_1p::Conv_coeff_inner()
 
   if (Re_i>0.0)
   {
-     cp_i = eos_uo.cp(_p_i[_qp], _T_i[_qp]);
+     cp_i = eos_uo.cp(_m[_qp], _p_i[_qp], _T_i[_qp]);
      lambda_i = eos_uo.lambda(_p_i[_qp], _T_i[_qp]);
      pr_i = vis_i * cp_i / lambda_i;
      if (Re_i<2300.0)
@@ -129,7 +129,7 @@ MoskitoCoaxialHeat_1p::Conv_coeff_outer()
   u_o = _flow_o[_qp] / area_o;
   rho_o = eos_uo.rho_from_p_T(_m[_qp], _p_o[_qp], _T_o[_qp]);
   vis_o = viscosity_uo.mu(_p_o[_qp], _T_o[_qp]);
-  cp_o = eos_uo.cp(_p_o[_qp], _T_o[_qp]);
+  cp_o = eos_uo.cp(_m[_qp], _p_o[_qp], _T_o[_qp]);
   lambda_o = eos_uo.lambda(_p_o[_qp], _T_o[_qp]);
   hd = 4.0 * area_o / (2.0 * PI * (_roi + _rio));
   Re_o = rho_o * hd * fabs(u_o) / vis_o;

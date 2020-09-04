@@ -38,7 +38,7 @@ public:
   virtual Real rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature) const override;
   virtual void rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature,
                         Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  virtual Real cp(const Real & pressure, const Real & temperature) const override;
+  virtual Real cp(const Real & molality, const Real & pressure, const Real & temperature) const override;
   virtual Real lambda(const Real & pressure, const Real & temperature) const override;
 
 protected:
