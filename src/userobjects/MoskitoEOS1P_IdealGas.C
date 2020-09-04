@@ -52,16 +52,16 @@ MoskitoEOS1P_IdealGas::MoskitoEOS1P_IdealGas(const InputParameters & parameters)
 }
 
 Real
-MoskitoEOS1P_IdealGas::rho_from_p_T(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_IdealGas::rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature) const
 {
   return pressure * _molar_mass / (_R * temperature);
 }
 
 void
-MoskitoEOS1P_IdealGas::rho_from_p_T(const Real & pressure, const Real & temperature,
+MoskitoEOS1P_IdealGas::rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature,
                             Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = this->rho_from_p_T(pressure, temperature);
+  rho = this->rho_from_p_T(molality, pressure, temperature);
   drho_dp = _molar_mass / (_R * temperature);
   drho_dT = -pressure * _molar_mass / (_R * temperature * temperature);
 }

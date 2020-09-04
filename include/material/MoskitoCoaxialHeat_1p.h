@@ -49,6 +49,10 @@ protected:
   Real _wt;
   Real _roi;
   Real _ki;
+
+  // Imported property from MoskitoFluidWell_1p1c
+  const MaterialProperty<Real> & _m;
+
   // The coupled temperature of inner pipe
   const VariableValue & _T_i;
   // The coupled flow rate of inner pipe

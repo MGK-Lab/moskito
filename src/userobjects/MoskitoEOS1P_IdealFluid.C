@@ -67,17 +67,17 @@ MoskitoEOS1P_IdealFluid::MoskitoEOS1P_IdealFluid(const InputParameters & paramet
 }
 
 Real
-MoskitoEOS1P_IdealFluid::rho_from_p_T(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_IdealFluid::rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature) const
 {
   return _rho_ref * std::exp((pressure-_P_ref) / _bulk_modulus - _thermal_expansion_0 *
           (temperature - _T_ref) - 0.5 * _thermal_expansion_1 * (temperature * temperature - _T_ref * _T_ref));
 }
 
 void
-MoskitoEOS1P_IdealFluid::rho_from_p_T(const Real & pressure, const Real & temperature,
+MoskitoEOS1P_IdealFluid::rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature,
                               Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = this->rho_from_p_T(pressure, temperature);
+  rho = this->rho_from_p_T(molality, pressure, temperature);
   drho_dp = rho / _bulk_modulus;
   drho_dT = (-_thermal_expansion_0 - _thermal_expansion_1 * temperature) * rho;
 }

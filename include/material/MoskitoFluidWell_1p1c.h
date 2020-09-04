@@ -47,6 +47,8 @@ protected:
   MaterialProperty<Real> & _hf;
   // The vescosity
   MaterialProperty<Real> & _vis;
+  // salt concentration
+  MaterialProperty<Real> & _m;
   // The constant thermal conductivity of fluid
   MaterialProperty<Real> & _lambda;
   // The specific heat at constant pressure
@@ -64,6 +66,8 @@ protected:
   const VariableValue & _T;
   // The coupled flow rate
   const VariableValue & _flow;
+
+  const Function & _mol;
 
   // function for calculating convective heat transfer coeff
   Real Conv_coeff();

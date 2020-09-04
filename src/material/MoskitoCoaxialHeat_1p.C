@@ -64,6 +64,7 @@ MoskitoCoaxialHeat_1p::MoskitoCoaxialHeat_1p(const InputParameters & parameters)
     _wt(getParam<Real>("inner_pipe_wall_thickness")),
     _roi(getParam<Real>("outer_pipe_inner_radius")),
     _ki(getParam<Real>("conductivity_inner_pipe")),
+    _m(getMaterialProperty<Real>("molality")),
     _T_i(coupledValue("temperature_inner_pipe")),
     _flow_i(coupledValue("flowrate_inner_pipe")),
     _p_i(coupledValue("pressure_inner_pipe")),
@@ -92,7 +93,7 @@ MoskitoCoaxialHeat_1p::Conv_coeff_inner()
 
   area_i = PI * (_rio - _wt) * (_rio - _wt);
   u_i = _flow_i[_qp] / area_i;
-  rho_i = eos_uo.rho_from_p_T(_p_i[_qp], _T_i[_qp]);
+  rho_i = eos_uo.rho_from_p_T(_m[_qp], _p_i[_qp], _T_i[_qp]);
   vis_i = viscosity_uo.mu(_p_i[_qp], _T_i[_qp]);
   Re_i = rho_i * 2.0 * (_rio - _wt) * fabs(u_i) / vis_i;
 
@@ -126,7 +127,7 @@ MoskitoCoaxialHeat_1p::Conv_coeff_outer()
 
   area_o = PI * (_roi * _roi - _rio * _rio );
   u_o = _flow_o[_qp] / area_o;
-  rho_o = eos_uo.rho_from_p_T(_p_o[_qp], _T_o[_qp]);
+  rho_o = eos_uo.rho_from_p_T(_m[_qp], _p_o[_qp], _T_o[_qp]);
   vis_o = viscosity_uo.mu(_p_o[_qp], _T_o[_qp]);
   cp_o = eos_uo.cp(_p_o[_qp], _T_o[_qp]);
   lambda_o = eos_uo.lambda(_p_o[_qp], _T_o[_qp]);
