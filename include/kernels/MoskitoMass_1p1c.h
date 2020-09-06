@@ -47,10 +47,13 @@ protected:
   const VariableGradient & _grad_q;
   // The gradient of the coupled temperature
   const VariableGradient & _grad_T;
+  // The gradient of the coupled molality
+  const VariableGradient & _grad_m;
 
   // Variable numberings
   unsigned _q_var_number;
   unsigned _T_var_number;
+  unsigned _m_var_number;
 
   // The area of pipe
   const MaterialProperty<Real> & _area;
@@ -64,4 +67,6 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt temperature
   const MaterialProperty<Real> & _drho_dT;
+  // The first derivative of density wrt salinity
+  const MaterialProperty<Real> & _drho_dm;
 };

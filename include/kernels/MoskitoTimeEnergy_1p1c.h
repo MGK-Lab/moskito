@@ -44,10 +44,13 @@ protected:
   const VariableValue & _q;
   const VariableValue & _p_dot;
   const VariableValue & _q_dot;
+  const VariableValue & _m_dot;
   const VariableValue & _dp_dot;
   const VariableValue & _dq_dot;
+  const VariableValue & _dm_dot;
   const unsigned int _p_var_number;
   const unsigned int _q_var_number;
+  const unsigned int _m_var_number;
 
   // The area of pipe
   const MaterialProperty<Real> & _area;
@@ -61,4 +64,6 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dT;
+  // The first derivative of density wrt salinity
+  const MaterialProperty<Real> & _drho_dm;
 };

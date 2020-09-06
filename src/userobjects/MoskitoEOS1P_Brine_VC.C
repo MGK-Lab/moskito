@@ -53,12 +53,13 @@ MoskitoEOS1P_Brine_VC::rho_from_p_T(const Real & molality, const Real & pressure
 
 void
 MoskitoEOS1P_Brine_VC::rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature,
-                              Real & rho, Real & drho_dp, Real & drho_dT) const
+                              Real & rho, Real & drho_dp, Real & drho_dT, Real & drho_dm) const
 {
   rho = this->rho_from_p_T(molality, pressure, temperature);
   Real _a = -9.9559*std::exp(-4.539e-3*molality) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
   drho_dp = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*9.971859e-10*std::exp(2.551e-10*pressure);
   drho_dT = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*-1.1604411e-3*std::exp(-1.638e-4*(temperature-273.15));
+  drho_dm = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*4.51898301e-2*std::exp(-4.539e-3*molality);
 }
 
 Real

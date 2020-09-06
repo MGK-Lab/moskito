@@ -23,53 +23,50 @@
 
 #pragma once
 
-#include "MoskitoFluidWellGeneral.h"
-#include "MoskitoEOS1P_MC.h"
-#include "MoskitoViscosity1P.h"
+#include "Kernel.h"
 
-class MoskitoFluidWell_1p_MC;
+class MoskitoTransport_1p2c;
 
 template <>
-InputParameters validParams<MoskitoFluidWell_1p_MC>();
+InputParameters validParams<MoskitoTransport_1p2c>();
 
-class MoskitoFluidWell_1p_MC : public MoskitoFluidWellGeneral
+class MoskitoTransport_1p2c : public Kernel
 {
 public:
-  MoskitoFluidWell_1p_MC(const InputParameters & parameters);
-  virtual void computeQpProperties() override;
+  MoskitoTransport_1p2c(const InputParameters & parameters);
 
 protected:
-  // Userobject to equation of state
-  const MoskitoEOS1P_MC & eos_uo;
-  // Userobject to Viscosity Eq
-  const MoskitoViscosity1P & viscosity_uo;
-  // The convective heat transfer factor of fluid in coaxial configuration
-  MaterialProperty<Real> & _hf;
-  // The vescosity
-  MaterialProperty<Real> & _vis;
-  // The constant thermal conductivity of fluid
-  MaterialProperty<Real> & _lambda;
-  // The specific heat at constant pressure
-  MaterialProperty<Real> & _cp;
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+
+  // The coupled flow_rate
+  const VariableValue & _q;
+
+  // The gradient of the coupled flow_rate
+  const VariableGradient & _grad_q;
+  // The gradient of the coupled temperature
+  const VariableGradient & _grad_T;
+  // The gradient of the coupled pressure
+  const VariableGradient & _grad_p;
+
+  // Variable numberings
+  unsigned _q_var_number;
+  unsigned _T_var_number;
+  unsigned _p_var_number;
+
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The unit vector of well direction
+  const MaterialProperty<RealVectorValue> & _well_dir;
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
   // The density
-  MaterialProperty<Real> & _rho;
+  const MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp;
+  const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt temperature
-  MaterialProperty<Real> & _drho_dT;
+  const MaterialProperty<Real> & _drho_dT;
   // The first derivative of density wrt salinity
-  MaterialProperty<Real> & _drho_dm;
-  // Enthalpy from P and T
-  MaterialProperty<Real> & _h;
-
-  // The coupled temperature
-  const VariableValue & _T;
-  // The coupled flow rate
-  const VariableValue & _flow;
-  // The coupled molality
-  const VariableValue & _m;
-
-
-  // function for calculating convective heat transfer coeff
-  Real Conv_coeff();
-};
+  const MaterialProperty<Real> & _drho_dm;
+  };

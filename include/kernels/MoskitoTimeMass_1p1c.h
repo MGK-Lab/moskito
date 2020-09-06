@@ -42,11 +42,16 @@ protected:
 
   // required values for temperature coupling
   const VariableValue & _T_dot;
+  const VariableValue & _m_dot;
   const VariableValue & _dT_dot;
+  const VariableValue & _dm_dot;
   const unsigned int _T_var_number;
+  const unsigned int _m_var_number;
 
   // The first derivative of density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt temperature
   const MaterialProperty<Real> & _drho_dT;
+  // The first derivative of density wrt salinity
+  const MaterialProperty<Real> & _drho_dm;
 };

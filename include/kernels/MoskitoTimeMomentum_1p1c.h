@@ -43,10 +43,13 @@ protected:
   // required values for temperature and pressure coupling
   const VariableValue & _p_dot;
   const VariableValue & _T_dot;
+  const VariableValue & _m_dot;
   const VariableValue & _dp_dot;
   const VariableValue & _dT_dot;
+  const VariableValue & _dm_dot;
   const unsigned int _p_var_number;
   const unsigned int _T_var_number;
+  const unsigned int _m_var_number;
 
   // The sign of well flow direction
   const MaterialProperty<Real> & _well_sign;
@@ -58,4 +61,6 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt temperature
   const MaterialProperty<Real> & _drho_dT;
+  // The first derivative of density wrt salinity
+  const MaterialProperty<Real> & _drho_dm;
 };

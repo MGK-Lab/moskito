@@ -44,10 +44,13 @@ protected:
   const VariableGradient & _grad_p;
   // The gradient of the coupled temperature
   const VariableGradient & _grad_T;
+  // The gradient of the coupled molality
+  const VariableGradient & _grad_m;
 
   // Variable numberings
   unsigned _p_var_number;
   unsigned _T_var_number;
+  unsigned _m_var_number;
 
   // The mixture density
   const MaterialProperty<Real> & _rho;
@@ -55,6 +58,8 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of mixture density wrt temperature
   const MaterialProperty<Real> & _drho_dT;
+  // The first derivative of density wrt salinity
+  const MaterialProperty<Real> & _drho_dm;
   // The pipe Moody friction factor
   const MaterialProperty<Real> & _f;
   // The gravity acceleration as a vector

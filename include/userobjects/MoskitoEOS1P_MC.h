@@ -48,7 +48,7 @@ public:
 
   // Density from pressure and temperature and its derivatives wrt pressure and temperature
   virtual void rho_from_p_T(const Real & molality, const Real & pressure, const Real & temperature,
-                        Real & rho, Real & drho_dp, Real & drho_dT) const = 0;
+                        Real & rho, Real & drho_dp, Real & drho_dT, Real & drho_dm) const = 0;
 
   // specific heat at constant pressure from temperature
   virtual Real cp(const Real & molality, const Real & pressure, const Real & temperature) const = 0;

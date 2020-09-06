@@ -33,11 +33,11 @@ validParams<MoskitoFluidWell_1p_MC>()
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
   params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
   params.addRequiredCoupledVar("flowrate", "Mixture flow rate nonlinear variable (m^3/s)");
+  params.addRequiredCoupledVar("molality", "molality nonlinear variable (m^3/s)");
   params.addRequiredParam<UserObjectName>("eos_uo",
         "The name of the userobject for EOS");
   params.addRequiredParam<UserObjectName>("viscosity_uo",
         "The name of the userobject for viscosity Eq");
-  params.addParam<FunctionName>("molality", "0.0", "A function that describes Concentration of NaCl (0.25<molal<5)");
 
   return params;
 }
@@ -48,16 +48,16 @@ MoskitoFluidWell_1p_MC::MoskitoFluidWell_1p_MC(const InputParameters & parameter
     viscosity_uo(getUserObject<MoskitoViscosity1P>("viscosity_uo")),
     _hf(declareProperty<Real>("convective_heat_factor")),
     _vis(declareProperty<Real>("viscosity")),
-    _m(declareProperty<Real>("molality")),
     _lambda(declareProperty<Real>("fluid_thermal_conductivity")),
     _cp(declareProperty<Real>("specific_heat")),
     _rho(declareProperty<Real>("density")),
     _drho_dp(declareProperty<Real>("drho_dp")),
     _drho_dT(declareProperty<Real>("drho_dT")),
+    _drho_dm(declareProperty<Real>("drho_dm")),
     _h(declareProperty<Real>("h_from_p_T")),
     _T(coupledValue("temperature")),
     _flow(coupledValue("flowrate")),
-    _mol(getFunction("molality"))
+    _m(coupledValue("molality"))
 {
 }
 
@@ -66,12 +66,11 @@ MoskitoFluidWell_1p_MC::computeQpProperties()
 {
   MoskitoFluidWellGeneral::computeQpProperties();
 
-  _m[_qp] = _mol.value(_t, _q_point[_qp]);
   _vis[_qp] = viscosity_uo.mu(_P[_qp], _T[_qp]);
   _lambda[_qp] = eos_uo.lambda(_P[_qp], _T[_qp]);
   _cp[_qp] = eos_uo.cp(_m[_qp], _P[_qp], _T[_qp]);
   _h[_qp] = eos_uo.h_from_p_T(_m[_qp], _P[_qp], _T[_qp]);
-  eos_uo.rho_from_p_T(_m[_qp], _P[_qp], _T[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp]);
+  eos_uo.rho_from_p_T(_m[_qp], _P[_qp], _T[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp], _drho_dm[_qp]);
 
   _u[_qp] = _flow[_qp] / _area[_qp];
   _Re[_qp] = _rho[_qp] * _dia[_qp] * fabs(_u[_qp]) / _vis[_qp];
