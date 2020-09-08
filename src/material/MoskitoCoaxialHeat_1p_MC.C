@@ -36,9 +36,11 @@ validParams<MoskitoCoaxialHeat_1p_MC>()
     params.addRequiredCoupledVar("temperature_inner_pipe", "Temperature of fluid inside inner pipe (K)");
     params.addRequiredCoupledVar("flowrate_inner_pipe", "Mixture flow rate inside inner pipe (m^3/s)");
     params.addRequiredCoupledVar("pressure_inner_pipe", "Pressure inside inner pipe (Pa)");
+    params.addRequiredCoupledVar("salinity_inner_pipe", "salinity inside inner pipe (Molar)");
     params.addRequiredCoupledVar("temperature_outer_pipe", "Temperature of fluid inside outer pipe (K)");
     params.addRequiredCoupledVar("flowrate_outer_pipe", "Mixture flow rate inside outer pipe (m^3/s)");
     params.addRequiredCoupledVar("pressure_outer_pipe", "Pressure inside outer pipe (Pa)");
+    params.addRequiredCoupledVar("salinity_outer_pipe", "salinity inside outer pipe (Molar)");
     params.addRequiredParam<Real>("inner_pipe_outer_radius",
           "outer radius of the inner pipe (m)");
     params.addRequiredParam<Real>("inner_pipe_wall_thickness",
@@ -64,13 +66,14 @@ MoskitoCoaxialHeat_1p_MC::MoskitoCoaxialHeat_1p_MC(const InputParameters & param
     _wt(getParam<Real>("inner_pipe_wall_thickness")),
     _roi(getParam<Real>("outer_pipe_inner_radius")),
     _ki(getParam<Real>("conductivity_inner_pipe")),
-    _m(getMaterialProperty<Real>("molality")),
     _T_i(coupledValue("temperature_inner_pipe")),
     _flow_i(coupledValue("flowrate_inner_pipe")),
     _p_i(coupledValue("pressure_inner_pipe")),
+    _m_i(coupledValue("pressure_inner_pipe")),
     _T_o(coupledValue("temperature_outer_pipe")),
     _flow_o(coupledValue("flowrate_outer_pipe")),
     _p_o(coupledValue("pressure_outer_pipe")),
+    _m_o(coupledValue("pressure_inner_pipe")),
     _nusselt_i(declareProperty<Real>("Nusselt_number_inner_pipe")),
     _nusselt_o(declareProperty<Real>("Nusselt_number_outer_pipe"))
 {
@@ -93,13 +96,13 @@ MoskitoCoaxialHeat_1p_MC::Conv_coeff_inner()
 
   area_i = PI * (_rio - _wt) * (_rio - _wt);
   u_i = _flow_i[_qp] / area_i;
-  rho_i = eos_uo.rho_from_p_T(_m[_qp], _p_i[_qp], _T_i[_qp]);
+  rho_i = eos_uo.rho_from_p_T(_m_i[_qp], _p_i[_qp], _T_i[_qp]);
   vis_i = viscosity_uo.mu(_p_i[_qp], _T_i[_qp]);
   Re_i = rho_i * 2.0 * (_rio - _wt) * fabs(u_i) / vis_i;
 
   if (Re_i>0.0)
   {
-     cp_i = eos_uo.cp(_m[_qp], _p_i[_qp], _T_i[_qp]);
+     cp_i = eos_uo.cp(_m_i[_qp], _p_i[_qp], _T_i[_qp]);
      lambda_i = eos_uo.lambda(_p_i[_qp], _T_i[_qp]);
      pr_i = vis_i * cp_i / lambda_i;
      if (Re_i<2300.0)
@@ -127,9 +130,9 @@ MoskitoCoaxialHeat_1p_MC::Conv_coeff_outer()
 
   area_o = PI * (_roi * _roi - _rio * _rio );
   u_o = _flow_o[_qp] / area_o;
-  rho_o = eos_uo.rho_from_p_T(_m[_qp], _p_o[_qp], _T_o[_qp]);
+  rho_o = eos_uo.rho_from_p_T(_m_o[_qp], _p_o[_qp], _T_o[_qp]);
   vis_o = viscosity_uo.mu(_p_o[_qp], _T_o[_qp]);
-  cp_o = eos_uo.cp(_m[_qp], _p_o[_qp], _T_o[_qp]);
+  cp_o = eos_uo.cp(_m_o[_qp], _p_o[_qp], _T_o[_qp]);
   lambda_o = eos_uo.lambda(_p_o[_qp], _T_o[_qp]);
   hd = 4.0 * area_o / (2.0 * PI * (_roi + _rio));
   Re_o = rho_o * hd * fabs(u_o) / vis_o;

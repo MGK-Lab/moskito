@@ -50,21 +50,22 @@ protected:
   Real _roi;
   Real _ki;
 
-  // Imported property from MoskitoFluidWell_1p1c
-  const MaterialProperty<Real> & _m;
-
   // The coupled temperature of inner pipe
   const VariableValue & _T_i;
   // The coupled flow rate of inner pipe
   const VariableValue & _flow_i;
   // The coupled pressure of inner pipe
   const VariableValue & _p_i;
+  // The coupled molality in the inner pipe
+  const VariableValue & _m_i;
   // The coupled temperature of outer pipe
   const VariableValue & _T_o;
   // The coupled flow rate of outer pipe
   const VariableValue & _flow_o;
   // The coupled pressure of outer pipe
   const VariableValue & _p_o;
+  // The coupled molality in the outer pipe
+  const VariableValue & _m_o;
   // Nusslet number inner pipe
   MaterialProperty<Real> & _nusselt_i;
   // Nusslet number outer pipe
