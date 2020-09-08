@@ -47,7 +47,8 @@ MoskitoEOS1P_Brine_VC::rho_from_p_T(const Real & molality, const Real & pressure
 {
   if (pressure <0.0 || temperature <273.15)
     mooseError("The pressure or temperature is out of the range.");
-  Real _a = -9.9559*std::exp(-4.539e-3*molality) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
+  Real _mass_frac = molality / ((1.0 - molality) * 0.05844);
+  Real _a = -9.9559*std::exp(-4.539e-3*_mass_frac) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
   return (-3.033405 + 10.128163*_a - 8.750567*_a*_a + 2.663107*_a*_a*_a)*1.0e3;
 }
 
@@ -56,17 +57,17 @@ MoskitoEOS1P_Brine_VC::rho_from_p_T(const Real & molality, const Real & pressure
                               Real & rho, Real & drho_dp, Real & drho_dT, Real & drho_dm) const
 {
   rho = this->rho_from_p_T(molality, pressure, temperature);
-  Real _a = -9.9559*std::exp(-4.539e-3*molality) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
+  Real _mass_frac = molality / ((1.0 - molality) * 0.05844);
+  Real _a = -9.9559*std::exp(-4.539e-3*_mass_frac) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
   drho_dp = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*9.971859e-10*std::exp(2.551e-10*pressure);
   drho_dT = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*-1.1604411e-3*std::exp(-1.638e-4*(temperature-273.15));
-  drho_dm = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*4.51898301e-2*std::exp(-4.539e-3*molality);
+  drho_dm = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*4.51898301e-2*std::exp(-4.539e-3*_mass_frac);
 }
 
 Real
 MoskitoEOS1P_Brine_VC::cp(const Real & molality, const Real & pressure, const Real & temperature) const
 {
-  Real mass_fraction = 58.443e-3 * molality / (1.0 + 58.443e-3 * molality);
-  return mass_fraction * 880 + (1.0 - mass_fraction) * 4190.0;
+  return molality * 880 + (1.0 - molality) * 4190.0;
 }
 
 Real
