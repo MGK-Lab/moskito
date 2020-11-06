@@ -53,8 +53,7 @@ validParams<MoskitoLatHeat_Inc_Formation_1p>()
           "Specific heat capacity of the formation (J/(kg*K))");
     params.addRequiredParam<Real>("formation_density",
           "Density of the formation (kg/m^3))");
-    params.addRequiredParam<Real>("formation_thermal_conductivity",
-          "Thermal conductivity of the formation (W/(m*K))");
+    params.addRequiredParam<FunctionName>("formation_thermal_conductivity_function", "Thermal conductivity of formation (W/(m*K))");
     params.addRequiredParam<FunctionName>("formation_temperature_function",
           "Static formation temperature as a function of depth and time (K)");
     params.addParam<Real>("manual_time", 86400,
@@ -80,7 +79,8 @@ MoskitoLatHeat_Inc_Formation_1p::MoskitoLatHeat_Inc_Formation_1p(const InputPara
     _lambda_vec(getParam<std::vector<Real>>("conductivities")),
     _Tform_func(getFunction("formation_temperature_function")),
     _Tform(declareProperty<Real>("formation_temperature")),
-    _lambda_form(getParam<Real>("formation_thermal_conductivity")),
+    _lambda_form_func(getFunction("formation_thermal_conductivity_function")),
+    _lambda_form(declareProperty<Real>("formation_thermal_conductivity")),
     _rho_form(getParam<Real>("formation_density")),
     _cp_form(getParam<Real>("formation_heat_capacity")),
     _Dti(getMaterialProperty<Real>("well_diameter")),
@@ -119,8 +119,7 @@ MoskitoLatHeat_Inc_Formation_1p::MoskitoLatHeat_Inc_Formation_1p(const InputPara
     _mt = true;
     _time = getParam<Real>("manual_time");
   }
-
-  _alpha_form = _lambda_form / _rho_form / _cp_form;
+  // _alpha_form = _lambda_form[_qp] / _rho_form / _cp_form;
   _Rto = _OD_vec[1] / 2.0;
   _Rwf = _OD_vec.back() / 2.0;
 
@@ -136,6 +135,7 @@ MoskitoLatHeat_Inc_Formation_1p::computeQpProperties()
 
   if(!_mt) _time = _t;
   _Tform[_qp] = _Tform_func.value(_t, _q_point[_qp]);
+  _lambda_form[_qp] = _lambda_form_func.value(_t, _q_point[_qp]);
   _ft = nonDtimefunction();
 
   if (_annulus_ind)
@@ -143,8 +143,8 @@ MoskitoLatHeat_Inc_Formation_1p::computeQpProperties()
   else
     _Uto[_qp] = ResistivityNoAnnulus(0, _lambda_vec.size(), _add_hf);
 
-  _lambda_t[_qp]  = _lambda_form  * _Rto * _Uto[_qp];
-  _lambda_t[_qp] /= _Rto * _Uto[_qp] * _ft + _lambda_form;
+  _lambda_t[_qp]  = _lambda_form[_qp]  * _Rto * _Uto[_qp];
+  _lambda_t[_qp] /= _Rto * _Uto[_qp] * _ft + _lambda_form[_qp];
 }
 
 Real
@@ -166,8 +166,8 @@ Real
 MoskitoLatHeat_Inc_Formation_1p::TemperatureWFinterface(const Real & Uto)
 {
   Real Twf = 0.0;
-  Twf += _Rto * Uto * _ft * _Tf[_qp] + _lambda_form * _Tform[_qp];
-  Twf /= _Rto * Uto * _ft + _lambda_form;
+  Twf += _Rto * Uto * _ft * _Tf[_qp] + _lambda_form[_qp] * _Tform[_qp];
+  Twf /= _Rto * Uto * _ft + _lambda_form[_qp];
 
   return Twf;
 }
@@ -177,7 +177,8 @@ MoskitoLatHeat_Inc_Formation_1p::nonDtimefunction()
 {
   Real ft = 0.0;
 
-  Real t_fac = _alpha_form * _time / _Rwf / _Rwf;
+  // Real t_fac = _alpha_form * _time / _Rwf / _Rwf;
+  Real t_fac = _lambda_form[_qp] / _rho_form / _cp_form * _time / _Rwf / _Rwf;
 
   switch (_time_func_user)
   {

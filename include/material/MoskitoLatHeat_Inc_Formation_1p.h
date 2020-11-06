@@ -68,7 +68,7 @@ protected:
 
   // Tolerance of finite difference derivation
   const Real _tol;
-  
+
   // outer diamters of well complition
   std::vector<Real> _OD_vec;
   // conductivities vector
@@ -83,7 +83,8 @@ protected:
   // formation temperature from the function
   MaterialProperty<Real> & _Tform;
   // formation properties
-  const Real & _lambda_form;
+  const Function & _lambda_form_func;
+  MaterialProperty<Real> & _lambda_form;
   const Real & _rho_form;
   const Real & _cp_form;
   Real _alpha_form;
